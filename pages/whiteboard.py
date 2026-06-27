@@ -4,7 +4,7 @@ import requests
 import datetime
 
 # --- 【設定】スプレッドシートIDをここに入れる ---
-SHEET_ID = "あなたのスプレッドシートID"
+SHEET_ID = "https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?usp=sharing"
 # クルー編成シートのCSV取得用URL
 MAIN_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=0#gid=0"
 # 部員名簿シートのCSV取得用URL (GIDはシートごとに異なります)
