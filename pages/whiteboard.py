@@ -9,7 +9,7 @@ def fetch_data():
     # secretsから情報を取得する想定
     # (Secretsにgspread用の設定がある前提です)
     gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
-    sh = gc.open_by_url("ここにあなたのスプレッドシートのURL")
+    sh = gc.open_by_url("https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=0#gid=0/edit")
     
     # シート名の読み込み
     worksheet = sh.worksheet("クルー編成")
