@@ -1,8 +1,7 @@
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 
-# 接続設定
-conn = st.connection("gsheets", type=GSheetsConnection)
+conn = st.connection("gsheets", type="gsheets")
 import pandas as pd
 import requests
 import datetime
