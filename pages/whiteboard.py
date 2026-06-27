@@ -6,9 +6,9 @@ import datetime
 # --- 【設定】スプレッドシートIDをここに入れる ---
 SHEET_ID = "あなたのスプレッドシートID"
 # クルー編成シートのCSV取得用URL
-MAIN_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=0"
+MAIN_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=0#gid=0"
 # 部員名簿シートのCSV取得用URL (GIDはシートごとに異なります)
-MEMBER_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=123456789" 
+MEMBER_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=0#gid=0" 
 
 @st.cache_data(ttl=60)
 def fetch_boat_data():
