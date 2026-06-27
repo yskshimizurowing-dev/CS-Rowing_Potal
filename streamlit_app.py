@@ -41,7 +41,7 @@ with col2:
         st.toast("乗艇練習ホワイトボードは現在開発中です！")
 with col3:
     # 欠席連絡（URLが用意できたら書き換えてください）
-    st.link_button("📝\n\n欠席連絡", "https://docs.google.com/forms/d/e/.../viewform", use_container_width=True)
+    st.link_button("📝\n\n欠席連絡", "https://docs.google.com/forms/d/e/1FAIpQLSdZWWNO0GpPOpadbspDl_YPgA_jx1Q2i4xUUdH44IinvhGY_w/viewform?usp=dialog", use_container_width=True)
 
 # 【2行目】
 col4, col5, col6 = st.columns(3)
