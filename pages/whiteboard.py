@@ -1,28 +1,25 @@
 import streamlit as st
 import pandas as pd
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
-# 接続の初期化
-def get_gsheet_client():
-    # Secretsから認証情報を取得する設定
-    # ※Secretsの設定を [connections.gcp] のように設定している場合
-    creds_dict = st.secrets["gcp_service_account"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict)
-    return gspread.authorize(creds)
-
-# データを読み込む関数（st.connectionを使わない！）
-@st.cache_data(ttl=10)
+@st.cache_data(ttl=60)
 def fetch_data():
-    # secretsから情報を取得する想定
-    # (Secretsにgspread用の設定がある前提です)
-    gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
-    sh = gc.open_by_url("https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=0#gid=0/edit")
+    # Streamlit Secretsから認証情報を読み込む（※要設定）
+    creds_dict = st.secrets["gcp_service_account"]
+    scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     
-    # シート名の読み込み
+    client = gspread.authorize(creds)
+    # スプレッドシートIDを直接指定（URL全体ではなくID部分）
+    sh = client.open_by_key("あなたのスプレッドシートID")
+    
+    # データを取得
     worksheet = sh.worksheet("クルー編成")
-    data = worksheet.get_all_values()
-    return pd.DataFrame(data)
+    return pd.DataFrame(worksheet.get_all_values())
+
+df = fetch_data()
+st.write(df)
 
 @st.cache_data(ttl=10) # 10秒間キャッシュ
 def fetch_boat_data():
