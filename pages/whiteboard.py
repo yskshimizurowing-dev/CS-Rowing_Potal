@@ -3,6 +3,11 @@ import pandas as pd
 import requests
 import datetime
 
+import streamlit as st
+# --- 追加する行 ---
+st.exception(Exception("デバッグ用テスト")) 
+# ------------------
+
 # --- 【設定】スプレッドシートIDをここに入れる ---
 SHEET_ID = "https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?usp=sharing"
 # クルー編成シートのCSV取得用URL
