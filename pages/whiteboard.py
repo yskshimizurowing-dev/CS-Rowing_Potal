@@ -1,5 +1,8 @@
 import streamlit as st
-conn = st.connection("gsheets", type="gsheets")
+from streamlit.connections import GSheetsConnection # これを必ず書く
+
+# type="gsheets" ではなく GSheetsConnection を指定する
+conn = st.connection("gsheets", type=GSheetsConnection)
 import pandas as pd
 import requests
 import datetime
