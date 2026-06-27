@@ -3,6 +3,14 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+# 接続の初期化
+def get_gsheet_client():
+    # Secretsから認証情報を取得する設定
+    # ※Secretsの設定を [connections.gcp] のように設定している場合
+    creds_dict = st.secrets["gcp_service_account"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict)
+    return gspread.authorize(creds)
+
 # データを読み込む関数（st.connectionを使わない！）
 @st.cache_data(ttl=10)
 def fetch_data():
