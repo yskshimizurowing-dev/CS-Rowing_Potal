@@ -15,27 +15,35 @@ st.write("---")
 # --- スマホでも強制的に3列横並びにするためのCSS ---
 st.markdown('''
 <style>
-    /* 1. スマホでも縦並びにさせず、強制的に横一列(3列)にする */
+    /* 1. 全体の横スクロール（画面のブレ）を完全に禁止する */
+    .stApp {
+        overflow-x: hidden !important;
+    }
+
+    /* 2. スマホでも強制的に横一列(3列)にして、隙間を8pxに固定する */
     div[data-testid="stHorizontalBlock"] {
         flex-direction: row !important;
         flex-wrap: nowrap !important;
+        gap: 8px !important; 
     }
     
-    /* 2. 3列の幅をきっちり均等(33%)に固定する */
+    /* 3. 隙間（8pxが2箇所＝16px）を引いた上で、綺麗に3等分する */
     div[data-testid="stHorizontalBlock"] > div {
-        width: 33.33% !important;
-        flex: 1 1 33.33% !important;
-        min-width: 33.33% !important;
+        width: calc((100% - 16px) / 3) !important;
+        flex: 0 0 calc((100% - 16px) / 3) !important;
+        min-width: calc((100% - 16px) / 3) !important;
+        max-width: calc((100% - 16px) / 3) !important;
     }
 
-    /* 3. ボタンを押しやすい正方形に近い形にする */
+    /* 4. ボタンを押しやすい正方形に近い形にする */
     div.stButton > button, div.stLinkButton > a {
         min-height: 100px !important;
         white-space: pre-wrap !important;
         font-weight: bold !important;
         border-radius: 16px !important;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
+        padding: 0px !important; /* 文字がはみ出さないように内側の余白を削る */
     }
 </style>
 ''', unsafe_allow_html=True)
