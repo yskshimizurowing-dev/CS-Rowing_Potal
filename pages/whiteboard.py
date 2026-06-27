@@ -5,7 +5,7 @@ import datetime
 
 # --- 【設定】スプレッドシートIDをここに入れる ---
 SHEET_ID = "1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY"
-MAIN_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=0#gid=0"
+MAIN_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY//export?format=csv&gid=0"
 MEMBER_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=1884915706#gid=1884915706" # 部員名簿のGID
 
 # --- データ取得 ---
