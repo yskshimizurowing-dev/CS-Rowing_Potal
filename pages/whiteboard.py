@@ -1,17 +1,20 @@
 import streamlit as st
-from streamlit.connections import GSheetsConnection # これを必ず書く
-
-# type="gsheets" ではなく GSheetsConnection を指定する
-conn = st.connection("gsheets", type=GSheetsConnection)
 import pandas as pd
-import requests
-import datetime
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-# ページの設定（スマホ向けにタイトなレイアウト、タイトル設定）
-st.set_page_config(page_title="ボート部 クルー＆メニュー", layout="centered")
-
-# --- スプレッドシートからのデータ取得処理 ---
-import streamlit as st
+# データを読み込む関数（st.connectionを使わない！）
+@st.cache_data(ttl=10)
+def fetch_data():
+    # secretsから情報を取得する想定
+    # (Secretsにgspread用の設定がある前提です)
+    gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
+    sh = gc.open_by_url("ここにあなたのスプレッドシートのURL")
+    
+    # シート名の読み込み
+    worksheet = sh.worksheet("クルー編成")
+    data = worksheet.get_all_values()
+    return pd.DataFrame(data)
 
 @st.cache_data(ttl=10) # 10秒間キャッシュ
 def fetch_boat_data():
