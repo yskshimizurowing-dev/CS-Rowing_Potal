@@ -15,15 +15,27 @@ st.write("---")
 # --- スマホでも強制的に3列横並びにするためのCSS ---
 st.markdown('''
 <style>
-    /* カラム全体を包むブロックを強制的に横並び(row)にする */
+    /* 1. スマホでも縦並びにさせず、強制的に横一列(3列)にする */
     div[data-testid="stHorizontalBlock"] {
         flex-direction: row !important;
+        flex-wrap: nowrap !important;
     }
-    /* 各カラムの幅を強制的に33.33%に固定する */
-    div[data-testid="column"] {
-        width: calc(33.3333% - 0.5rem) !important;
-        flex: 1 1 calc(33.3333% - 0.5rem) !important;
-        min-width: calc(33.3333% - 0.5rem) !important;
+    
+    /* 2. 3列の幅をきっちり均等(33%)に固定する */
+    div[data-testid="stHorizontalBlock"] > div {
+        width: 33.33% !important;
+        flex: 1 1 33.33% !important;
+        min-width: 33.33% !important;
+    }
+
+    /* 3. ボタンを押しやすい正方形に近い形にする */
+    div.stButton > button, div.stLinkButton > a {
+        min-height: 100px !important;
+        white-space: pre-wrap !important;
+        font-weight: bold !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+        font-size: 14px !important;
     }
 </style>
 ''', unsafe_allow_html=True)
