@@ -9,8 +9,9 @@ MAIN_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94d
 MEMBER_URL = f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=1884915706#gid=1884915706" # 部員名簿のGID
 
 # --- データ取得 ---
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=0)
 def fetch_all_data():
+    st.write(f"https://docs.google.com/spreadsheets/d/1Gy3_HwI4ESQpMXrdF6XJI5G-94dQM2sEUd4zYgDkVgY/edit?gid=1884915706#gid=1884915706: {MAIN_URL}") # これでURLが正しいか画面で確認できます
     df_main = pd.read_csv(MAIN_URL, header=None)
     df_member = pd.read_csv(MEMBER_URL)
     
