@@ -1,6 +1,4 @@
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
-
 conn = st.connection("gsheets", type="gsheets")
 import pandas as pd
 import requests
@@ -11,7 +9,6 @@ st.set_page_config(page_title="ボート部 クルー＆メニュー", layout="c
 
 # --- スプレッドシートからのデータ取得処理 ---
 import streamlit as st
-#from streamlit_gsheets import GSheetsConnection
 
 @st.cache_data(ttl=10) # 10秒間キャッシュ
 def fetch_boat_data():
