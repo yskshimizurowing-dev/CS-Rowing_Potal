@@ -7,12 +7,12 @@ import datetime
 st.set_page_config(page_title="ボート部 クルー＆メニュー", layout="centered")
 
 # --- スプレッドシートからのデータ取得処理 ---
-from streamlit_gsheets import GSheetsConnection
+#from streamlit_gsheets import GSheetsConnection
 
 @st.cache_data(ttl=10) # 10秒間キャッシュ
 def fetch_boat_data():
     
-    conn = st.connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type="gsheets")
     
     # 1. 【修正】「クルー編成」シートの読み込みに変更
     df_main = conn.read(worksheet="クルー編成", header=None)
