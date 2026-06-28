@@ -6,7 +6,6 @@ st.title("🛶 エルゴ・レースプランシミュレーター")
 st.write("カテゴリを選んで目標数値を入力し、レースプランを作成します。")
 st.markdown("---")
 
-# --- 初期化 ---
 if "active_plan_flag" not in st.session_state:
     st.session_state["active_plan_flag"] = False
 
@@ -15,7 +14,6 @@ def clear_plan_states():
         st.session_state[f"q{i}_offset_sec"] = 0.0
     st.session_state["active_plan_flag"] = False
 
-# --- カテゴリー選択 ---
 menus = [
     "距離 と 目標タイム から【全体のAverage】を出す", 
     "距離 と Average から【目標タイム】を出す",
@@ -23,65 +21,71 @@ menus = [
     "合計時間 と Average から【目標距離】を出す"
 ]
 default_index = st.session_state.get("fixed_mode_idx", 0) if st.session_state["active_plan_flag"] else 0
-
 selected_menu = st.selectbox("① 計算したいカテゴリーを選択してください", menus, index=default_index, on_change=clear_plan_states)
 mode_idx = menus.index(selected_menu)
 
 calc_dist, calc_secs, calc_ave = 0.0, 0.0, 0.0
-main_col1, main_col2 = st.columns([1, 1])
 
-# --- 入力処理 ---
+# --- 全ての入力項目を2カラム構成で統一し、高さを固定 ---
+c1, c2 = st.columns(2)
+
 if mode_idx == 0:
-    with main_col1:
-        st.write("② 距離 (m)")
-        calc_dist = float(st.number_input("距離", value=2000, step=500, key="m0_d", label_visibility="collapsed"))
-    with main_col2:
+    with c1:
+        st.write("② 距離")
+        d_sub = st.columns([3, 1])
+        calc_dist = float(d_sub[0].number_input("距離", value=2000, step=500, key="m0_d", label_visibility="collapsed"))
+        d_sub[1].write("m")
+    with c2:
         st.write("③ 目標タイム")
-        t_cols = st.columns(2)
-        v_m = t_cols[0].number_input("分", min_value=0, value=8, step=1, key="m0_m")
-        v_s = t_cols[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m0_s")
+        t_sub = st.columns(2)
+        v_m = t_sub[0].number_input("分", min_value=0, value=8, step=1, key="m0_m")
+        v_s = t_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m0_s")
         calc_secs = float((v_m * 60) + v_s)
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 必要なAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
-    with main_col1:
-        st.write("② 距離 (m)")
-        calc_dist = float(st.number_input("距離", value=2000, step=500, key="m1_d", label_visibility="collapsed"))
-    with main_col2:
+    with c1:
+        st.write("② 距離")
+        d_sub = st.columns([3, 1])
+        calc_dist = float(d_sub[0].number_input("距離", value=2000, step=500, key="m1_d", label_visibility="collapsed"))
+        d_sub[1].write("m")
+    with c2:
         st.write("③ 全体のAverage")
-        a_cols = st.columns(2)
-        v_am = a_cols[0].number_input("分", min_value=0, value=2, step=1, key="m1_am")
-        v_as = a_cols[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m1_as")
+        a_sub = st.columns(2)
+        v_am = a_sub[0].number_input("分", min_value=0, value=2, step=1, key="m1_am")
+        v_as = a_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m1_as")
         calc_ave = float((v_am * 60) + v_as)
     if calc_dist > 0: calc_secs = calc_ave * (calc_dist / 500)
     st.info(f"④ 算出された合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    with main_col1:
+    with c1:
         st.write("② 合計時間")
-        t_cols = st.columns(2)
-        v_tm = t_cols[0].number_input("分", min_value=0, value=20, step=1, key="m2_tm")
-        v_ts = t_cols[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts")
+        t_sub = st.columns(2)
+        v_tm = t_sub[0].number_input("分", min_value=0, value=20, step=1, key="m2_tm")
+        v_ts = t_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts")
         calc_secs = float((v_tm * 60) + v_ts)
-    with main_col2:
-        st.write("③ 距離 (m)")
-        calc_dist = float(st.number_input("距離", value=5000, step=500, key="m2_d", label_visibility="collapsed"))
+    with c2:
+        st.write("③ 距離")
+        d_sub = st.columns([3, 1])
+        calc_dist = float(d_sub[0].number_input("距離", value=5000, step=500, key="m2_d", label_visibility="collapsed"))
+        d_sub[1].write("m")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 計算されたAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
-    with main_col1:
+    with c1:
         st.write("② 測定時間")
-        t_cols = st.columns(2)
-        v_tm = t_cols[0].number_input("分", min_value=0, value=20, step=1, key="m3_tm")
-        v_ts = t_cols[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m3_ts")
+        t_sub = st.columns(2)
+        v_tm = t_sub[0].number_input("分", min_value=0, value=20, step=1, key="m3_tm")
+        v_ts = t_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m3_ts")
         calc_secs = float((v_tm * 60) + v_ts)
-    with main_col2:
+    with c2:
         st.write("③ 目標Average")
-        a_cols = st.columns(2)
-        v_am = a_cols[0].number_input("分", min_value=0, value=1, step=1, key="m3_am")
-        v_as = a_cols[1].number_input("秒", min_value=0, max_value=59, value=50, step=1, key="m3_as")
+        a_sub = st.columns(2)
+        v_am = a_sub[0].number_input("分", min_value=0, value=1, step=1, key="m3_am")
+        v_as = a_sub[1].number_input("秒", min_value=0, max_value=59, value=50, step=1, key="m3_as")
         calc_ave = float((v_am * 60) + v_as)
     if calc_ave > 0: calc_dist = (calc_secs / calc_ave) * 500
     st.info(f"④ 想定される合計目標距離: **{calc_dist:.1f} m**")
