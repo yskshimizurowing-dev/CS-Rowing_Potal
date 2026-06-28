@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
 st.title("🛶 エルゴ・レースプランシミュレーター")
-st.write("カテゴリを選んで目標数値を入力し、レースプランを作成・シミュレーションします。")
+st.write("カテゴリを選んで目標数値を入力し、レースプラン作成・シミュレーションします。")
 st.markdown("---")
 
 # --- セッション状態の初期化 ---
@@ -40,11 +40,7 @@ menus = [
 
 default_index = 0
 if st.session_state["active_plan_flag"]:
-    if st.session_state["fixed_calc_mode"] == "time_base":
-        # 正しくtime_baseとしてロックされている場合は、メニュー2か3を維持
-        default_index = st.session_state.get("fixed_mode_idx", 0)
-    else:
-        default_index = st.session_state.get("fixed_mode_idx", 0)
+    default_index = st.session_state.get("fixed_mode_idx", 0)
 
 selected_menu = st.selectbox(
     "① 計算したいカテゴリーを選択してください",
@@ -54,20 +50,17 @@ selected_menu = st.selectbox(
 )
 mode_idx = menus.index(selected_menu)
 
-#st.markdown("### **入力エリア**")
-col1, col2 = st.columns(2)
-
+# ★【原因の根絶】ここに昔あった「col1, col2 = st.columns(2)」を完全に撤廃しました！
 tmp_dist = 0.0
 tmp_secs = 0.0
 tmp_ave = 0.0
 
-# ★ ここでボート競技の計算ロジックに基いて、完全に紐付けを正しました。
 if mode_idx == 0:
-    # 距離固定系
     current_type = "distance_base"
-    with col1:
+    c1, c2 = st.columns(2)
+    with c1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m0_d", on_change=clear_plan_states)
-    with col2:
+    with c2:
         st.write("③ 全体の目標タイム")
         cm, cs = st.columns(2)
         with cm:
@@ -81,11 +74,11 @@ if mode_idx == 0:
         st.info(f"④ 必要な全体のAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
-    # 距離固定系
     current_type = "distance_base"
-    with col1:
+    c1, c2 = st.columns(2)
+    with c1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m1_d", on_change=clear_plan_states)
-    with col2:
+    with c2:
         st.write("③ 全体のAverage (/500m)")
         cam, cas = st.columns(2)
         with cam:
@@ -99,25 +92,14 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
+    # --- ご要望のメニュー2番の表示ロジック ---
     current_type = "time_base"
     
-    # 枠全体の左右分割：左側に「②合計時間」、右側に「③距離」を配置
+    # 完全に新しく独立させた左右2列分割
     main_col1, main_col2 = st.columns(2)
     
     with main_col1:
         st.write("② 合計時間")
-        # HTMLのテーブルを使い、入力欄と単位を完全に横一行に固定します
-        time_html = """
-        <table style="width:100%; border:none; border-collapse:collapse;">
-            <tr style="border:none;">
-                <td style="width:35%; border:none; padding:0;"><div id="m2_min_placeholder"></div></td>
-                <td style="width:15%; border:none; padding:0 5px; vertical-align:middle; font-size:16px;">分</td>
-                <td style="width:35%; border:none; padding:0;"><div id="m2_sec_placeholder"></div></td>
-                <td style="width:15%; border:none; padding:0 5px; vertical-align:middle; font-size:16px;">秒</td>
-            </tr>
-        </table>
-        """
-        # 分と秒の入力欄を配置
         t_sub1, t_sub2, t_sub3, t_sub4 = st.columns([3.5, 1.5, 3.5, 1.5])
         with t_sub1:
             v_tm = st.number_input("分", min_value=0, max_value=120, value=20, step=1, key="m2_tm", label_visibility="collapsed", on_change=clear_plan_states)
@@ -132,7 +114,6 @@ elif mode_idx == 2:
         
     with main_col2:
         st.write("③ 距離")
-        # 距離と「m」を横並びにする
         d_sub1, d_sub2 = st.columns([8, 2])
         with d_sub1:
             v_dist = st.number_input("距離", value=5000, step=500, key="m2_d", label_visibility="collapsed", on_change=clear_plan_states)
@@ -146,15 +127,14 @@ elif mode_idx == 2:
     else:
         tmp_ave = 0.0
         
-    # 【最重要】main_colのブロック（with）から完全に外に出す
-    # これにより、右寄りが解消され、②と③の真下にフルサイズでドカンと表示されます
+    # カラムの外側。これで完全に左端からフルサイズで下に表示されます
     st.write("") 
     st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
-    # 時間固定系
     current_type = "time_base"
-    with col1:
+    c1, c2 = st.columns(2)
+    with c1:
         st.write("② 合計の測定時間")
         ctm, cts = st.columns(2)
         with ctm:
@@ -162,7 +142,7 @@ elif mode_idx == 3:
         with cts:
             v_ts = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m3_ts", on_change=clear_plan_states)
         tmp_secs = (v_tm * 60) + v_ts
-    with col2:
+    with c2:
         st.write("③ 目標のAverage (/500m)")
         cam, cas = st.columns(2)
         with cam:
@@ -213,7 +193,6 @@ if st.session_state["active_plan_flag"]:
     calculated_total_seconds = 0.0
     calculated_total_distance = 0.0
 
-    # 動的なレイアウトヘッダー
     hc1, hc2, hc3, hc4 = st.columns([1, 2, 2, 3])
     with hc1: st.caption("🔲 Q")
     with hc2: st.caption("🏃 500m Ave")
@@ -225,7 +204,6 @@ if st.session_state["active_plan_flag"]:
         
     st.markdown("---")
 
-    # 1Q〜4Qのループ処理
     for i in range(1, 5):
         c_q, c_ave, c_btn, c_val = st.columns([1, 2, 2, 3])
         
@@ -236,13 +214,10 @@ if st.session_state["active_plan_flag"]:
         q_m = int(final_q_sec // 60)
         q_s = final_q_sec % 60
 
-        # 正しい定義に沿ったQごとの計算
         if calc_mode == "distance_base":
-            # 距離測定系：1Qあたりの距離は固定
             this_q_dist = dist_total / 4
             this_q_secs = final_q_sec * (this_q_dist / 500)
         else:
-            # 時間測定系：1Qあたりの時間は固定
             this_q_secs = secs_total / 4
             if final_q_sec > 0:
                 this_q_dist = (this_q_secs / final_q_sec) * 500
@@ -282,7 +257,6 @@ if st.session_state["active_plan_flag"]:
     # --- ⑦ 最終結果表示エリア ---
     st.markdown("### **現在の合計**")
     
-    # ご要望のレイアウト：現在のプランの総合数値を提示
     if calc_mode == "distance_base":
         p_total_m = int(calculated_total_seconds // 60)
         p_total_s = calculated_total_seconds % 60
@@ -296,7 +270,6 @@ if st.session_state["active_plan_flag"]:
         else:
             st.info(f"💡 **目標より {abs(diff_secs):.1f} 秒速いです。** あと {abs(diff_secs):.1f} 秒余裕があります。")
     else:
-        # メニュー2番、3番はこちらの時間固定系（Q距離が変動するモード）に正しく入ります！
         st.write(f"現在のプラン合計距離: **{calculated_total_distance:.1f} m** （目標距離: {dist_total:.1f} m）")
         
         diff_m = calculated_total_distance - dist_total
