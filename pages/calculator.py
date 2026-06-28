@@ -54,7 +54,7 @@ selected_menu = st.selectbox(
 )
 mode_idx = menus.index(selected_menu)
 
-st.markdown("### **入力エリア**")
+#st.markdown("### **入力エリア**")
 col1, col2 = st.columns(2)
 
 tmp_dist = 0.0
