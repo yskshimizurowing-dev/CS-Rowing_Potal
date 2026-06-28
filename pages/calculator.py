@@ -53,7 +53,7 @@ if mode_idx == 0:
     calc_dist = distance_input_aligned(c1, "距離", "m0_d")
     calc_secs = time_input_aligned(c2, "目標タイム", "m0_m", "m0_s")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
-    st.info(f"④ Average: **{int(calc_ave // 60)}:{calc_ave % 60:04.1f}秒** / 500m")
+    st.info(f"④ Average: **{int(calc_ave // 60)}:{calc_ave % 60:04.1f}** / 500m")
 elif mode_idx == 1:
     calc_dist = distance_input_aligned(c1, "距離", "m1_d")
     calc_secs = time_input_aligned(c2, "全体のAverage", "m1_am", "m1_as")
@@ -63,7 +63,7 @@ elif mode_idx == 2:
     calc_secs = time_input_aligned(c1, "合計時間", "m2_tm", "m2_ts")
     calc_dist = distance_input_aligned(c2, "距離", "m2_d")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
-    st.info(f"④ Average: **{int(calc_ave // 60)}:{calc_ave % 60:04.1f}秒** / 500m")
+    st.info(f"④ Average: **{int(calc_ave // 60)}:{calc_ave % 60:04.1f}** / 500m")
 elif mode_idx == 3:
     calc_secs = time_input_aligned(c1, "測定時間", "m3_tm", "m3_ts")
     calc_ave = time_input_aligned(c2, "目標Average", "m3_am", "m3_as")
