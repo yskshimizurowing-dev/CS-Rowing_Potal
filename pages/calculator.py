@@ -63,14 +63,14 @@ if st.session_state["active_plan_flag"]:
         if f"q{i}_off" not in st.session_state: st.session_state[f"q{i}_off"] = 0.0
         q_sec = base_ave + st.session_state[f"q{i}_off"]
         
-        # Qごとの詳細表示
+        # 0.5単位まで表示するように変更
         if calc_mode == 'distance_base':
             this_v = q_sec * ((dist_total/4)/500)
-            st.write(f"**{i}Q** Ave:{int(q_sec//60)}:{q_sec%60:02.0f} ➔ タイム:{int(this_v//60)}:{this_v%60:02.0f}")
+            st.write(f"**{i}Q** Ave:{int(q_sec//60)}:{q_sec%60:04.1f} ➔ タイム:{int(this_v//60)}:{this_v%60:04.1f}")
             p_total_secs += this_v
         else:
             this_v = (secs_total/4/q_sec)*500 if q_sec > 0 else 0
-            st.write(f"**{i}Q** Ave:{int(q_sec//60)}:{q_sec%60:02.0f} ➔ 距離:{this_v:.1f}m")
+            st.write(f"**{i}Q** Ave:{int(q_sec//60)}:{q_sec%60:04.1f} ➔ 距離:{this_v:.1f}m")
             p_total_dist += this_v
         
         # 操作ボタン
@@ -78,14 +78,14 @@ if st.session_state["active_plan_flag"]:
         if b1.button("➕ 0.5s", key=f"p{i}"): st.session_state[f"q{i}_off"] += 0.5; st.rerun()
         if b2.button("➖ 0.5s", key=f"m{i}"): st.session_state[f"q{i}_off"] -= 0.5; st.rerun()
 
-    # 合計判定エリア（リセットボタンと共に配置）
+    # 合計判定エリア
     st.markdown("---")
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
-        st.write(f"### 合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:02.0f}")
+        st.write(f"### 合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:04.1f}")
         st.write("🎉 目標とピッタリ！" if abs(diff) < 0.5 else (f"⚠️ {diff:.1f}秒遅い" if diff > 0 else f"💡 {abs(diff):.1f}秒速い"))
     else:
-        diff = p_total_dist - dist_total
+        diff = p_total_dist - secs_total # 修正：比較先をsecs_totalで統一
         st.write(f"### 合計距離: {p_total_dist:.1f}m")
         st.write("🎉 目標とピッタリ！" if abs(diff) < 0.5 else (f"🚀 {diff:.1f}m多い" if diff > 0 else f"⚠️ {abs(diff):.1f}m不足"))
 
