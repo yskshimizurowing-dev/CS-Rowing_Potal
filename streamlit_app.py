@@ -45,24 +45,32 @@ st.markdown('''
 </style>
 ''', unsafe_allow_html=True)
 
-# --- 4. ボタン描画ロジック ---
-# ログイン判定が必要な場合はインデントを揃えて記述します
-if st.session_state.get("logged_in"):
+# --- 4. ログイン認証確認とボタン描画 ---
+# st.user はStreamlit Cloudの認証機能が有効な場合、ログイン時にユーザー情報が入ります
+if st.user is not None:
+    # 3x3 のレイアウトを生成
     for i in range(0, 9, 3):
         cols = st.columns(3)
         for j, col in enumerate(cols):
             btn = BUTTONS[i + j]
             with col:
                 if btn["type"] == "gas":
+                    # トークンを付与して遷移
                     url_with_token = f"{btn['url']}?token={SECRET_TOKEN}"
                     st.link_button(btn["label"], url_with_token, use_container_width=True)
+                
                 elif btn["type"] == "link":
+                    # 通常のリンク遷移
                     st.link_button(btn["label"], btn["url"], use_container_width=True)
+                
                 elif btn["type"] == "page":
+                    # Streamlit内ページ遷移
                     if st.button(btn["label"], use_container_width=True):
                         st.switch_page(btn["url"])
+                
                 elif btn["type"] == "dev":
+                    # 開発中機能
                     if st.button(btn["label"], use_container_width=True):
                         st.toast(f"{btn['label'].splitlines()[-1]}は現在開発中です！")
 else:
-    st.info("ログインしてください。")
+    st.warning("ポータルを利用するにはログインが必要です。")
