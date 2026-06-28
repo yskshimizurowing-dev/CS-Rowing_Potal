@@ -54,7 +54,7 @@ st.markdown('''
 # 【1行目】
 col1, col2, col3 = st.columns(3)
 with col1:    # トレーニングメニュー
-    if st.button("🏋️\n\nトレーニングメニュー", "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", use_container_width=True)
+    st.link_button("🏋️\n\nトレーニングメニュー", "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", use_container_width=True)
         
 with col2:
     if st.button("📋\n\nホワイトボード", use_container_width=True):
