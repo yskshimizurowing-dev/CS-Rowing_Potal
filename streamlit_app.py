@@ -49,7 +49,7 @@ st.markdown('''
 ''', unsafe_allow_html=True)
 
 # --- 4. ボタン描画ロジック ---
-if st.session_state.get("logged_in"):
+#if st.session_state.get("logged_in"):
     # 3x3 のレイアウトを生成
     for i in range(0, 9, 3):
         cols = st.columns(3)
