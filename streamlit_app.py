@@ -53,14 +53,13 @@ st.markdown('''
 
 # 【1行目】
 col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("🏋️\n\nトレーニング", use_container_width=True):
-        st.toast("トレーニングメニューは現在開発中です！")
+with col1:    # トレーニングメニュー
+    if st.button("🏋️\n\nトレーニングメニュー","https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", use_container_width=True):
+        
 with col2:
     if st.button("📋\n\nホワイトボード", use_container_width=True):
         st.switch_page("./pages/whiteboard.py")
-with col3:
-    # 欠席連絡（URLが用意できたら書き換えてください）
+with col3:    # 欠席連絡
     st.link_button("📝\n\n欠席連絡", "https://docs.google.com/forms/d/e/1FAIpQLSdZWWNO0GpPOpadbspDl_YPgA_jx1Q2i4xUUdH44IinvhGY_w/viewform?usp=dialog", use_container_width=True)
 
 # 【2行目】
