@@ -17,7 +17,7 @@ BUTTONS = [
     {"label": "🔧\n\nリギング", "key": "URL_RIGGING", "type": "gas"},
     {"label": "📦\n\n備品管理", "url": "dev", "type": "dev"},
     {"label": "📊\n\n動画解析", "url": "dev", "type": "dev"},
-    {"label": "☁️\n\nURL_DRIVE", "key": "URL_DRIVE", "type": "link"}, # 共有ドライブもKey化しました
+    {"label": "☁️\n\nGoogleドライブ", "key": "URL_DRIVE", "type": "link"}, 
 ]
 
 # --- 2. 基本設定 ---
