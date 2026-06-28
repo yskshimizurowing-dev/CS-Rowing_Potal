@@ -2,7 +2,6 @@ import streamlit as st
 
 st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
-# スマホでの表示を考慮したCSS
 st.markdown("""
 <style>
     .stButton>button { width: 100%; height: 32px; font-size: 11px; font-weight: bold; }
@@ -14,6 +13,7 @@ st.markdown("# 🛶 エルゴ・<br>レースプランシミュレーター", un
 
 if "active_plan_flag" not in st.session_state: st.session_state["active_plan_flag"] = False
 
+# 入力欄
 with st.expander("①～⑤ 設定入力と作成", expanded=not st.session_state["active_plan_flag"]):
     menus = ["距離と目標タイム", "距離とAverage", "合計時間と距離", "合計時間とAverage"]
     mode_idx = menus.index(st.selectbox("カテゴリ", menus))
@@ -33,16 +33,20 @@ with st.expander("①～⑤ 設定入力と作成", expanded=not st.session_stat
         st.session_state.update({"active_plan_flag": True, "fixed_ave_seconds": calc_ave, "fixed_distance_m": calc_dist, "fixed_total_seconds": calc_secs, "fixed_calc_mode": "time_base" if mode_idx >= 2 else "distance_base"})
         st.rerun()
 
+# 調整エリア
 if st.session_state["active_plan_flag"]:
-    base_ave, dist_total, secs_total, calc_mode = st.session_state["fixed_ave_seconds"], st.session_state["fixed_distance_m"], st.session_state["fixed_total_seconds"], st.session_state["fixed_calc_mode"]
+    base_ave = st.session_state["fixed_ave_seconds"]
+    dist_total = st.session_state["fixed_distance_m"]
+    secs_total = st.session_state["fixed_total_seconds"]
+    calc_mode = st.session_state["fixed_calc_mode"]
+
     st.subheader("⏱️ 各Qの調整")
-    
     p_total_secs, p_total_dist = 0.0, 0.0
     for i in range(1, 5):
         if f"q{i}_off" not in st.session_state: st.session_state[f"q{i}_off"] = 0.0
         q_sec = base_ave + st.session_state[f"q{i}_off"]
         
-        # 1行にすべてを詰め込む
+        # 1行目: 情報表示
         if calc_mode == 'distance_base':
             this_v = q_sec * ((dist_total/4)/500)
             st.markdown(f"**{i}Q** (Ave:{int(q_sec//60)}:{q_sec%60:02.0f}) ➔ `{int(this_v//60)}:{this_v%60:02.0f}`")
@@ -52,6 +56,7 @@ if st.session_state["active_plan_flag"]:
             st.markdown(f"**{i}Q** (Ave:{int(q_sec//60)}:{q_sec%60:02.0f}) ➔ `{this_v:.0f}m`")
             p_total_dist += this_v
         
+        # 2行目: プラスマイナスボタンを横並び
         b_cols = st.columns(2)
         if b_cols[0].button("➕ 0.5s", key=f"p{i}"): st.session_state[f"q{i}_off"] += 0.5; st.rerun()
         if b_cols[1].button("➖ 0.5s", key=f"m{i}"): st.session_state[f"q{i}_off"] -= 0.5; st.rerun()
