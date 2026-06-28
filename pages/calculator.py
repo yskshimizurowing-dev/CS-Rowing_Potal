@@ -78,7 +78,7 @@ if st.button("⑤ レースプランを作成", type="primary"):
 
 if st.session_state["active_plan_flag"]:
     base_ave, dist_total, secs_total, calc_mode = st.session_state["fixed_ave_seconds"], st.session_state["fixed_distance_m"], st.session_state["fixed_total_seconds"], st.session_state["fixed_calc_mode"]
-    st.subheader("⏱️ 各Qの調整")
+    st.subheader("各Qの調整")
     if st.button("このプランをリセット"):
         for i in range(1, 5): st.session_state[f"q{i}_offset_sec"] = 0.0
         st.rerun()
