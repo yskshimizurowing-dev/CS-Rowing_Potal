@@ -26,17 +26,20 @@ mode_idx = menus.index(selected_menu)
 
 calc_dist, calc_secs, calc_ave = 0.0, 0.0, 0.0
 
-# 左右のメインカラム（50%ずつ）
+# すべての入力項目を「2列」で統一して高さを揃える
 c1, c2 = st.columns(2)
 
-# --- 距離の入力（mの単位をラベル内に含めて表示位置を強制固定） ---
-def distance_input(col, label, key):
+# 距離専用：分・秒の構成と合わせるため、[数値入力, 単位(m)]の2列にする
+def distance_input_aligned(col, label, key):
     with col:
         st.write(f"② {label}")
-        return float(st.number_input("距離(m)", value=2000, step=500, key=key, label_visibility="collapsed"))
+        cols = st.columns([3, 1])
+        val = cols[0].number_input("距離", value=2000, step=500, key=key, label_visibility="collapsed")
+        cols[1].write("m")
+        return float(val)
 
-# --- 時間の入力（分・秒を2カラムで固定） ---
-def time_input(col, label, key_m, key_s):
+# 時間専用：[分, 秒]の2列構成
+def time_input_aligned(col, label, key_m, key_s):
     with col:
         st.write(f"③ {label}")
         cols = st.columns(2)
@@ -46,27 +49,26 @@ def time_input(col, label, key_m, key_s):
 
 # ロジック分岐
 if mode_idx == 0:
-    calc_dist = distance_input(c1, "距離 (m)", "m0_d")
-    calc_secs = time_input(c2, "目標タイム", "m0_m", "m0_s")
+    calc_dist = distance_input_aligned(c1, "距離", "m0_d")
+    calc_secs = time_input_aligned(c2, "目標タイム", "m0_m", "m0_s")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 必要なAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
-    calc_dist = distance_input(c1, "距離 (m)", "m1_d")
-    calc_secs = time_input(c2, "全体のAverage (分:秒)", "m1_am", "m1_as")
-    calc_ave = calc_secs # Averageとしてそのまま使用
-    calc_secs = calc_ave * (calc_dist / 500)
+    calc_dist = distance_input_aligned(c1, "距離", "m1_d")
+    calc_secs = time_input_aligned(c2, "全体のAverage", "m1_am", "m1_as")
+    calc_secs = calc_secs * (calc_dist / 500)
     st.info(f"④ 算出された合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    calc_secs = time_input(c1, "合計時間", "m2_tm", "m2_ts")
-    calc_dist = distance_input(c2, "距離 (m)", "m2_d")
+    calc_secs = time_input_aligned(c1, "合計時間", "m2_tm", "m2_ts")
+    calc_dist = distance_input_aligned(c2, "距離", "m2_d")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 計算されたAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
-    calc_secs = time_input(c1, "測定時間", "m3_tm", "m3_ts")
-    calc_ave = time_input(c2, "目標Average", "m3_am", "m3_as")
+    calc_secs = time_input_aligned(c1, "測定時間", "m3_tm", "m3_ts")
+    calc_ave = time_input_aligned(c2, "目標Average", "m3_am", "m3_as")
     if calc_ave > 0: calc_dist = (calc_secs / calc_ave) * 500
     st.info(f"④ 想定される合計目標距離: **{calc_dist:.1f} m**")
 
