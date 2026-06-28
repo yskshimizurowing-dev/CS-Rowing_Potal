@@ -34,17 +34,36 @@ st.write("---")
 # --- 3. デザインCSS ---
 st.markdown('''
 <style>
-    .stApp { overflow-x: hidden !important; }
-    div[data-testid="stHorizontalBlock"] { flex-direction: row !important; flex-wrap: nowrap !important; gap: 8px !important; }
-    div[data-testid="stHorizontalBlock"] > div { width: calc((100% - 16px) / 3) !important; flex: 0 0 calc((100% - 16px) / 3) !important; }
-    div.stButton > button, div.stLinkButton > a { 
-        min-height: 100px !important; 
-        white-space: pre-wrap !important; 
-        font-weight: bold !important; 
-        border-radius: 16px !important; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important; 
-        font-size: 13px !important; 
-        padding: 0px !important; 
+    /* 1. 画面全体の横幅とマージンを調整 */
+    .block-container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* 2. ボタンの配置用コンテナの制御 */
+    div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        gap: 10px !important; /* 隙間を固定 */
+    }
+
+    /* 3. 各カラムを確実に3等分する */
+    div[data-testid="stHorizontalBlock"] > div {
+        flex: 1 !important;
+        min-width: 0 !important; /* これが重要：幅を強制的に収める */
+    }
+    
+    /* 4. ボタンの見た目調整 */
+    div.stButton > button, div.stLinkButton > a {
+        width: 100% !important;
+        height: 100px !important; /* 高さを固定して正方形に近づける */
+        padding: 5px !important;
+        font-size: 12px !important;
+        white-space: pre-line !important; /* 改行を有効にする */
+        border-radius: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
     }
 </style>
 ''', unsafe_allow_html=True)
