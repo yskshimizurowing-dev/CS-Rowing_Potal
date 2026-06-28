@@ -1,123 +1,76 @@
 import streamlit as st
 
-# 画面全体の基本設定（タイトルや幅）
+# --- 1. 設定・定義 ---
+# 運用に合わせて変更してください
+SECRET_TOKEN = "your_secret_key_2026"
+
+# ボタンの設定リスト
+# type: 'gas' (トークン付き外部遷移), 'page' (内部遷移), 'link' (トークンなし外部遷移), 'dev' (開発中)
+BUTTONS = [
+    {"label": "🏋️\n\nトレーニング", "url": "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", "type": "gas"},
+    {"label": "📋\n\nホワイトボード", "url": "./pages/whiteboard.py", "type": "page"},
+    {"label": "📝\n\n欠席連絡", "url": "https://forms.gle/BRUbZgVGwcyvKd7v6", "type": "link"},
+    {"label": "🚣\n\n測定記録DB", "url": "https://script.google.com/macros/s/YYYY/exec", "type": "gas"},
+    {"label": "🧮\n\nAverage計算", "url": "./pages/calculator.py", "type": "page"},
+    {"label": "🔧\n\nリギング", "url": "https://script.google.com/macros/s/ZZZZ/exec", "type": "gas"},
+    {"label": "📦\n\n備品管理", "url": "dev", "type": "dev"},
+    {"label": "📊\n\n動画解析", "url": "dev", "type": "dev"},
+    {"label": "☁️\n\n共有ドライブ", "url": "https://drive.google.com/drive/folders/0AKWbU0VyiymNUk9PVA", "type": "link"},
+]
+
+# --- 2. 基本設定 ---
 st.set_page_config(
     page_title="ボート部専用ポータル",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# タイトル部分
+# タイトル
 st.markdown("<h1 style='text-align: center; color: #333;'>ボート部専用ポータル</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #666;'>メニューを選択してください</p>", unsafe_allow_html=True)
 st.write("---")
 
-# --- スマホでも強制的に3列横並びにするためのCSS ---
+# --- 3. デザインCSS ---
 st.markdown('''
 <style>
-    /* 1. 全体の横スクロール（画面のブレ）を完全に禁止する */
-    .stApp {
-        overflow-x: hidden !important;
-    }
-
-    /* 2. スマホでも強制的に横一列(3列)にして、隙間を8pxに固定する */
-    div[data-testid="stHorizontalBlock"] {
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 8px !important; 
-    }
-    
-    /* 3. 隙間（8pxが2箇所＝16px）を引いた上で、綺麗に3等分する */
-    div[data-testid="stHorizontalBlock"] > div {
-        width: calc((100% - 16px) / 3) !important;
-        flex: 0 0 calc((100% - 16px) / 3) !important;
-        min-width: calc((100% - 16px) / 3) !important;
-        max-width: calc((100% - 16px) / 3) !important;
-    }
-
-    /* 4. ボタンを押しやすい正方形に近い形にする */
-    div.stButton > button, div.stLinkButton > a {
-        min-height: 100px !important;
-        white-space: pre-wrap !important;
-        font-weight: bold !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-        font-size: 13px !important;
-        padding: 0px !important; /* 文字がはみ出さないように内側の余白を削る */
+    .stApp { overflow-x: hidden !important; }
+    div[data-testid="stHorizontalBlock"] { flex-direction: row !important; flex-wrap: nowrap !important; gap: 8px !important; }
+    div[data-testid="stHorizontalBlock"] > div { width: calc((100% - 16px) / 3) !important; flex: 0 0 calc((100% - 16px) / 3) !important; }
+    div.stButton > button, div.stLinkButton > a { 
+        min-height: 100px !important; 
+        white-space: pre-wrap !important; 
+        font-weight: bold !important; 
+        border-radius: 16px !important; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important; 
+        font-size: 13px !important; 
+        padding: 0px !important; 
     }
 </style>
 ''', unsafe_allow_html=True)
 
-
-# ★ここから3×3のタイル配置を作る（行ごとに3列ずつ分ける）
-
-# 【1行目】
-col1, col2, col3 = st.columns(3)
-with col1:    # トレーニングメニュー
-    if st.session_state.get("logged_in"):
-    #if st.button("🏋️\n\nトレーニングメニュー"):
-        secret_token = "your_secret_key_2026"
-        gas_url = f"https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec?token={secret_token}"
-
-        button_html = f"""
-        <a href="{gas_url}" target="_top" style="
-            display: block;
-            width: 100%;
-            background-color: #2563eb;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-        ">
-            🏋️\n\nトレーニングメニュー
-        </a>
-        """
-        st.components.v1.html(button_html, height=60)    
-        
-    #st.link_button("🏋️\n\nトレーニングメニュー", "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", use_container_width=True)
-        
-with col2:
-    if st.button("📋\n\nホワイトボード", use_container_width=True):
-        st.switch_page("./pages/whiteboard.py")
-with col3:    # 欠席連絡
-    st.link_button("📝\n\n欠席連絡", "https://forms.gle/BRUbZgVGwcyvKd7v6", use_container_width=True)
-
-# 【2行目】
-col4, col5, col6 = st.columns(3)
-with col4:
-    if st.button("🚣\n\n測定記録DB", use_container_width=True):
-        st.toast("測定記録データベースは現在開発中です！")
-with col5:
-    if st.button("🧮\n\nAverage計算", use_container_width=True):
-        st.switch_page("./pages/calculator.py")
-with col6:
-    if st.button("🔧\n\nリギング", use_container_width=True):
-        st.toast("リギングサポートは現在開発中です！")
-
-# 【3行目】
-col7, col8, col9 = st.columns(3)
-with col7:
-    if st.button("📦\n\n備品管理", use_container_width=True):
-        st.toast("備品管理ツールは現在開発中です！")
-with col8:
-    if st.button("📊\n\n動画解析", use_container_width=True):
-        st.toast("動画解析ツールは現在開発中です！")
-with col9:    # Googleドライブ
-    st.link_button("☁️\n\n共有ドライブ", "https://drive.google.com/drive/folders/0AKWbU0VyiymNUk9PVA", use_container_width=True)
-
-# スマートフォンで見やすくするための見た目調整CSS
-st.markdown("""
-<style>
-    /* ボタンを正方形に近づけ、文字を中央に配置する */
-    div.stButton > button, div.stLinkButton > a {
-        min-height: 100px !important;
-        white-space: pre-wrap !important;
-        font-weight: bold !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+# --- 4. ボタン描画ロジック ---
+if st.session_state.get("logged_in"):
+    # 3x3 のレイアウトを生成
+    for i in range(0, 9, 3):
+        cols = st.columns(3)
+        for j, col in enumerate(cols):
+            btn = BUTTONS[i + j]
+            with col:
+                if btn["type"] == "gas":
+                    # トークンを付与して遷移
+                    url_with_token = f"{btn['url']}?token={SECRET_TOKEN}"
+                    st.link_button(btn["label"], url_with_token, use_container_width=True)
+                
+                elif btn["type"] == "link":
+                    # 通常のリンク遷移
+                    st.link_button(btn["label"], btn["url"], use_container_width=True)
+                
+                elif btn["type"] == "page":
+                    # Streamlit内ページ遷移
+                    if st.button(btn["label"], use_container_width=True):
+                        st.switch_page(btn["url"])
+                
+                elif btn["type"] == "dev":
+                    # 開発中機能
+                    if st.button(btn["label"], use_container_width=True):
+                        st.toast(f"{btn['label'].splitlines()[-1]}は現在開発中です！")
