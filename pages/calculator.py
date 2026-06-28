@@ -41,9 +41,10 @@ menus = [
 default_index = 0
 if st.session_state["active_plan_flag"]:
     if st.session_state["fixed_calc_mode"] == "time_base":
-        default_index = 3
+        # 正しくtime_baseとしてロックされている場合は、メニュー2か3を維持
+        default_index = st.session_state.get("fixed_mode_idx", 0)
     else:
-        default_index = 0
+        default_index = st.session_state.get("fixed_mode_idx", 0)
 
 selected_menu = st.selectbox(
     "① 計算したいカテゴリーを選択してください",
@@ -60,7 +61,9 @@ tmp_dist = 0.0
 tmp_secs = 0.0
 tmp_ave = 0.0
 
+# ★ ここでボート競技の計算ロジックに基いて、完全に紐付けを正しました。
 if mode_idx == 0:
+    # 距離固定系
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m0_d", on_change=clear_plan_states)
@@ -78,6 +81,7 @@ if mode_idx == 0:
         st.info(f"④ 必要な全体のAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
+    # 距離固定系
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m1_d", on_change=clear_plan_states)
@@ -95,7 +99,8 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    current_type = "distance_base"
+    # 【修正】時間固定系（総時間が20分等でロックされ、1Qの時間も定まるため、出すべきはQ距離、競うべきは合計距離です）
+    current_type = "time_base"
     with col1:
         st.write("② 合計時間")
         ctm, cts = st.columns(2)
@@ -113,6 +118,7 @@ elif mode_idx == 2:
         st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
+    # 時間固定系
     current_type = "time_base"
     with col1:
         st.write("② 合計の測定時間")
@@ -140,6 +146,7 @@ if not st.session_state["active_plan_flag"]:
     st.session_state["fixed_distance_m"] = tmp_dist
     st.session_state["fixed_total_seconds"] = tmp_secs
     st.session_state["fixed_calc_mode"] = current_type
+    st.session_state["fixed_mode_idx"] = mode_idx
 
 st.markdown("---")
 
@@ -149,6 +156,7 @@ if st.button("⑤ レースプランを作成", type="primary"):
     st.session_state["fixed_distance_m"] = tmp_dist
     st.session_state["fixed_total_seconds"] = tmp_secs
     st.session_state["fixed_calc_mode"] = current_type
+    st.session_state["fixed_mode_idx"] = mode_idx
     st.rerun()
 
 
@@ -171,18 +179,14 @@ if st.session_state["active_plan_flag"]:
     calculated_total_seconds = 0.0
     calculated_total_distance = 0.0
 
-    # 動的なヘッダー設定（不要な列は作らない）
+    # 動的なレイアウトヘッダー
+    hc1, hc2, hc3, hc4 = st.columns([1, 2, 2, 3])
+    with hc1: st.caption("🔲 Q")
+    with hc2: st.caption("🏃 500m Ave")
+    with hc3: st.caption("➕ ➖")
     if calc_mode == "distance_base":
-        hc1, hc2, hc3, hc4 = st.columns([1, 2, 2, 3])
-        with hc1: st.caption("🔲 Q")
-        with hc2: st.caption("🏃 500m Ave")
-        with hc3: st.caption("➕ ➖")
         with hc4: st.caption("⏱️ Qタイム")
     else:
-        hc1, hc2, hc3, hc4 = st.columns([1, 2, 2, 3])
-        with hc1: st.caption("🔲 Q")
-        with hc2: st.caption("🏃 500m Ave")
-        with hc3: st.caption("➕ ➖")
         with hc4: st.caption("📏 Q距離")
         
     st.markdown("---")
@@ -198,11 +202,13 @@ if st.session_state["active_plan_flag"]:
         q_m = int(final_q_sec // 60)
         q_s = final_q_sec % 60
 
-        # 計算処理と不要データの非表示化
+        # 正しい定義に沿ったQごとの計算
         if calc_mode == "distance_base":
+            # 距離測定系：1Qあたりの距離は固定
             this_q_dist = dist_total / 4
             this_q_secs = final_q_sec * (this_q_dist / 500)
         else:
+            # 時間測定系：1Qあたりの時間は固定
             this_q_secs = secs_total / 4
             if final_q_sec > 0:
                 this_q_dist = (this_q_secs / final_q_sec) * 500
@@ -242,20 +248,12 @@ if st.session_state["active_plan_flag"]:
     # --- ⑦ 最終結果表示エリア ---
     st.markdown("### **現在の合計**")
     
-    # 全体の最終的な合計Averageを算出する
-    if calculated_total_distance > 0:
-        final_total_ave = calculated_total_seconds / (calculated_total_distance / 500)
-    else:
-        final_total_ave = 0.0
-        
-    final_ave_m = int(final_total_ave // 60)
-    final_ave_s = final_total_ave % 60
-
-    # ご要望通り「合計Average」を最優先でドンと大きく表示
-    st.metric(label="🏃 プラン合計 Average (/500m)", value=f"{final_ave_m:02d}:{final_ave_s:04.1f}")
-
-    # 目標値との比較フィードバック
+    # ご要望のレイアウト：現在のプランの総合数値を提示
     if calc_mode == "distance_base":
+        p_total_m = int(calculated_total_seconds // 60)
+        p_total_s = calculated_total_seconds % 60
+        st.write(f"現在のプラン合計タイム: **{p_total_m}分{p_total_s:04.1f}秒** （目標タイム: {int(secs_total//60)}分{secs_total%60:04.1f}秒）")
+        
         diff_secs = calculated_total_seconds - secs_total
         if abs(diff_secs) < 0.01:
             st.success("🎉 **目標タイムとピッタリ一致しています！完璧なレースプランです。**")
@@ -264,10 +262,13 @@ if st.session_state["active_plan_flag"]:
         else:
             st.info(f"💡 **目標より {abs(diff_secs):.1f} 秒速いです。** あと {abs(diff_secs):.1f} 秒余裕があります。")
     else:
+        # メニュー2番、3番はこちらの時間固定系（Q距離が変動するモード）に正しく入ります！
+        st.write(f"現在のプラン合計距離: **{calculated_total_distance:.1f} m** （目標距離: {dist_total:.1f} m）")
+        
         diff_m = calculated_total_distance - dist_total
         if abs(diff_m) < 0.5:
             st.success("🎉 **目標距離とピッタリ一致しています！完璧なペース配分です。**")
         elif diff_m > 0:
-            st.success(f"🚀 **目標より {abs(diff_m):.1f} m 多く漕げます！**")
+            st.success(f"🚀 **目標より {abs(diff_m):.1f} m 多く漕げます！ （ナイスプラン）**")
         else:
             st.error(f"⚠️ **目標より {abs(diff_m):.1f} m 不足しています。** あと少しペースを上げてください。")
