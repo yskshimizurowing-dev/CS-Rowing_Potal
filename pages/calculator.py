@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
 st.markdown("#  エルゴ・レースプラン<br>シミュレーター", unsafe_allow_html=True)
-st.write("カテゴリを選んで目標数値を入力し、レースプランを作成します。")
+#st.write("カテゴリを選んで目標数値を入力し、レースプランを作成します。")
 st.markdown("---")
 
 if "active_plan_flag" not in st.session_state:
@@ -15,10 +15,10 @@ def clear_plan_states():
     st.session_state["active_plan_flag"] = False
 
 menus = [
-    "距離 と 目標タイム から【全体のAverage】を出す", 
-    "距離 と Average から【目標タイム】を出す",
-    "合計時間 と 距離 から【全体のAverage】を出す",
-    "合計時間 と Average から【目標距離】を出す"
+    "距離 と タイム から【Average】を出す", 
+    "距離 と Average から【タイム】を出す",
+    "合計時間 と 距離 から【Average】を出す",
+    "合計時間 と Average から【距離】を出す"
 ]
 default_index = st.session_state.get("fixed_mode_idx", 0) if st.session_state["active_plan_flag"] else 0
 selected_menu = st.selectbox("① 計算したいカテゴリーを選択してください", menus, index=default_index, on_change=clear_plan_states)
@@ -53,22 +53,22 @@ if mode_idx == 0:
     calc_dist = distance_input_aligned(c1, "距離", "m0_d")
     calc_secs = time_input_aligned(c2, "目標タイム", "m0_m", "m0_s")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
-    st.info(f"④ 必要なAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
+    st.info(f"④ Average: **{int(calc_ave // 60)}:{calc_ave % 60:04.1f}秒** / 500m")
 elif mode_idx == 1:
     calc_dist = distance_input_aligned(c1, "距離", "m1_d")
     calc_secs = time_input_aligned(c2, "全体のAverage", "m1_am", "m1_as")
     calc_secs = calc_secs * (calc_dist / 500)
-    st.info(f"④ 算出された合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
+    st.info(f"④ 合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
 elif mode_idx == 2:
     calc_secs = time_input_aligned(c1, "合計時間", "m2_tm", "m2_ts")
     calc_dist = distance_input_aligned(c2, "距離", "m2_d")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
-    st.info(f"④ 計算されたAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
+    st.info(f"④ Average: **{int(calc_ave // 60)}:{calc_ave % 60:04.1f}秒** / 500m")
 elif mode_idx == 3:
     calc_secs = time_input_aligned(c1, "測定時間", "m3_tm", "m3_ts")
     calc_ave = time_input_aligned(c2, "目標Average", "m3_am", "m3_as")
     if calc_ave > 0: calc_dist = (calc_secs / calc_ave) * 500
-    st.info(f"④ 想定される合計目標距離: **{calc_dist:.1f} m**")
+    st.info(f"④ 合計距離: **{calc_dist:.1f} m**")
 
 # プラン作成・調整ロジック
 st.markdown("---")
