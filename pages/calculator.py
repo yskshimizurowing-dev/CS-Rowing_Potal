@@ -101,7 +101,7 @@ if st.session_state["active_plan_flag"]:
     st.markdown("---")
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
-        st.write(f"合計タイム: {int(p_total_secs//60)}分{p_total_secs%60:.1f}秒")
+        st.write(f"合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:.1f}")
         if abs(diff) < 0.1: st.success("設定タイムと一致")
         elif diff > 0: st.error(f"⚠️ 設定タイムに対し {diff:.1f} 秒超過")
         else: st.info(f"💡 設定タイムに対し {abs(diff):.1f} 秒猶予")
