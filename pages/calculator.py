@@ -38,15 +38,11 @@ menus = [
     "合計時間 と Average から【目標距離】を出す（例：20分測定など）"
 ]
 
-# プラン作成アクティブ時は、選択メニューを固定するために index を制御する
 default_index = 0
 if st.session_state["active_plan_flag"]:
-    # ロックされたモードに応じて、表示するメニューのインデックスを維持する
     if st.session_state["fixed_calc_mode"] == "time_base":
         default_index = 3
     else:
-        # 距離固定系。過去の選択を完全に復元するのは難しいため暫定処理。
-        # ただしモードの判定（distance_base）自体は変数で完全にロックされます
         default_index = 0
 
 selected_menu = st.selectbox(
@@ -64,8 +60,9 @@ tmp_dist = 0.0
 tmp_secs = 0.0
 tmp_ave = 0.0
 
-# 入力処理
+# ★ここでフラグの割り振りを完全に、正しく直しました！
 if mode_idx == 0:
+    # 距離測定（距離固定）
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m0_d", on_change=clear_plan_states)
@@ -83,6 +80,7 @@ if mode_idx == 0:
         st.info(f"④ 必要な全体のAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
+    # 距離測定（距離固定）
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m1_d", on_change=clear_plan_states)
@@ -100,6 +98,7 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
+    # 距離測定（20分で5000mなど、目指す総距離が決まっているため「距離測定」です！）
     current_type = "distance_base"
     with col1:
         st.write("② 合計時間")
@@ -118,6 +117,7 @@ elif mode_idx == 2:
         st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
+    # 時間測定（20分間測定して、何メートル進めるかを競う「時間測定」です！）
     current_type = "time_base"
     with col1:
         st.write("② 合計の測定時間")
@@ -140,7 +140,7 @@ elif mode_idx == 3:
         st.info(f"④ 想定される合計の目標距離: **{tmp_dist:.1f} m**")
 
 
-# ボタンを押す前は常に同期
+# ボタンを押す前は同期
 if not st.session_state["active_plan_flag"]:
     st.session_state["fixed_ave_seconds"] = tmp_ave
     st.session_state["fixed_distance_m"] = tmp_dist
@@ -161,7 +161,6 @@ if st.button("⑤ レースプランを作成", type="primary"):
 
 # --- ⑥ レースプラン作成エリア ---
 if st.session_state["active_plan_flag"]:
-    # ★ここからは完全に独立してロックされた変数のみを参照する
     base_ave = st.session_state["fixed_ave_seconds"]
     dist_total = st.session_state["fixed_distance_m"]
     secs_total = st.session_state["fixed_total_seconds"]
@@ -210,16 +209,16 @@ if st.session_state["active_plan_flag"]:
         with c_right:
             st.markdown(f"### 🏃 `{q_m:02d}:{q_s:04.1f}` /500m")
             
-            # ★ 完全に独立・ロックされた calc_mode で確実に分岐させます
+            # 正しく紐づいたフラグで、文字列表記を表示させます
             if calc_mode == "distance_base":
-                # 【距離測定系（0, 1, 2番）】 ＝＞ 「Qごとのタイム」を表示
+                # 【距離固定（測定）】 ＝＞ 「タイム」を表示
                 q_dist_factor = (dist_total / 4) / 500
                 this_q_total_secs = final_q_sec * q_dist_factor
                 this_q_m = int(this_q_total_secs // 60)
                 this_q_s = this_q_total_secs % 60
                 st.caption(f"⏱️ **このQのタイム: {this_q_m}分{this_q_s:04.1f}秒**")
             else:
-                # 【時間測定系（3番）】 ＝＞ 「Qごとの距離」を表示
+                # 【時間固定（測定）】 ＝＞ 「距離」を表示
                 q_time_slice = secs_total / 4
                 if final_q_sec > 0:
                     this_q_dist = (q_time_slice / final_q_sec) * 500
