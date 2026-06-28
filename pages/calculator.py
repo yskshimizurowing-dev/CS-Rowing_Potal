@@ -99,24 +99,40 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    # 2列に分けず、1列の中で上から順に「②時間」「③距離」「④計算結果」を表示させる
     current_type = "time_base"
     
-    st.write("② 合計時間")
-    ctm, cts = st.columns(2)
-    with ctm:
-        v_tm = st.number_input("分", min_value=0, max_value=120, value=20, step=1, key="m2_tm", on_change=clear_plan_states)
-    with cts:
-        v_ts = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts", on_change=clear_plan_states)
-    tmp_secs = (v_tm * 60) + v_ts
+    # 全体をまず左（②時間）と右（③距離）の2列に分ける
+    top_col1, top_col2 = st.columns(2)
     
-    v_dist = st.number_input("③ 距離 (m)", value=5000, step=500, key="m2_d", on_change=clear_plan_states)
-    tmp_dist = v_dist
-    
+    with top_col1:
+        st.write("② 合計時間")
+        # 時間の中でさらに「分」「秒」を横並びにするための列分割（単位用カラムも用意）
+        time_cols = st.columns([2, 1, 2, 1])
+        with time_cols[0]:
+            v_tm = st.number_input("分ラベル", min_value=0, max_value=120, value=20, step=1, key="m2_tm", label_visibility="collapsed", on_change=clear_plan_states)
+        with time_cols[1]:
+            st.markdown("<div style='padding-top: 10px;'>分</div>", unsafe_html=True)
+        with time_cols[2]:
+            v_ts = st.number_input("秒ラベル", min_value=0, max_value=59, value=0, step=1, key="m2_ts", label_visibility="collapsed", on_change=clear_plan_states)
+        with time_cols[3]:
+            st.markdown("<div style='padding-top: 10px;'>秒</div>", unsafe_html=True)
+        tmp_secs = (v_tm * 60) + v_ts
+        
+    with top_col2:
+        st.write("③ 距離")
+        # 距離マスの右側に「m」を置くための列分割
+        dist_cols = st.columns([5, 1])
+        with dist_cols[0]:
+            v_dist = st.number_input("距離ラベル", value=5000, step=500, key="m2_d", label_visibility="collapsed", on_change=clear_plan_states)
+        with dist_cols[1]:
+            st.markdown("<div style='padding-top: 10px;'>m</div>", unsafe_html=True)
+        tmp_dist = v_dist
+        
     if tmp_dist > 0:
         tmp_ave = tmp_secs / (tmp_dist / 500)
         
-    # ③のすぐ下に結果を表示（col2のブロックから外に出しました）
+    # ②と③の列分割（top_col）の外に出すことで、必ず2つのマスの下に縦並びで表示されます
+    st.write("")  # 少し隙間を空ける
     st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
