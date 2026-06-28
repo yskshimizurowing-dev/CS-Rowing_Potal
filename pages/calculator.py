@@ -26,90 +26,61 @@ mode_idx = menus.index(selected_menu)
 
 calc_dist, calc_secs, calc_ave = 0.0, 0.0, 0.0
 
-# --- 全ての入力項目を2カラム構成で統一し、高さを固定 ---
+# 左右のメインカラム（50%ずつ）
 c1, c2 = st.columns(2)
 
+# --- 距離の入力（mの単位をラベル内に含めて表示位置を強制固定） ---
+def distance_input(col, label, key):
+    with col:
+        st.write(f"② {label}")
+        return float(st.number_input("距離(m)", value=2000, step=500, key=key, label_visibility="collapsed"))
+
+# --- 時間の入力（分・秒を2カラムで固定） ---
+def time_input(col, label, key_m, key_s):
+    with col:
+        st.write(f"③ {label}")
+        cols = st.columns(2)
+        m = cols[0].number_input("分", min_value=0, value=8, step=1, key=key_m)
+        s = cols[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key=key_s)
+        return float(m * 60 + s)
+
+# ロジック分岐
 if mode_idx == 0:
-    with c1:
-        st.write("② 距離")
-        d_sub = st.columns([3, 1])
-        calc_dist = float(d_sub[0].number_input("距離", value=2000, step=500, key="m0_d", label_visibility="collapsed"))
-        d_sub[1].write("m")
-    with c2:
-        st.write("③ 目標タイム")
-        t_sub = st.columns(2)
-        v_m = t_sub[0].number_input("分", min_value=0, value=8, step=1, key="m0_m")
-        v_s = t_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m0_s")
-        calc_secs = float((v_m * 60) + v_s)
+    calc_dist = distance_input(c1, "距離 (m)", "m0_d")
+    calc_secs = time_input(c2, "目標タイム", "m0_m", "m0_s")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 必要なAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
-    with c1:
-        st.write("② 距離")
-        d_sub = st.columns([3, 1])
-        calc_dist = float(d_sub[0].number_input("距離", value=2000, step=500, key="m1_d", label_visibility="collapsed"))
-        d_sub[1].write("m")
-    with c2:
-        st.write("③ 全体のAverage")
-        a_sub = st.columns(2)
-        v_am = a_sub[0].number_input("分", min_value=0, value=2, step=1, key="m1_am")
-        v_as = a_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m1_as")
-        calc_ave = float((v_am * 60) + v_as)
-    if calc_dist > 0: calc_secs = calc_ave * (calc_dist / 500)
+    calc_dist = distance_input(c1, "距離 (m)", "m1_d")
+    calc_secs = time_input(c2, "全体のAverage (分:秒)", "m1_am", "m1_as")
+    calc_ave = calc_secs # Averageとしてそのまま使用
+    calc_secs = calc_ave * (calc_dist / 500)
     st.info(f"④ 算出された合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    with c1:
-        st.write("② 合計時間")
-        t_sub = st.columns(2)
-        v_tm = t_sub[0].number_input("分", min_value=0, value=20, step=1, key="m2_tm")
-        v_ts = t_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts")
-        calc_secs = float((v_tm * 60) + v_ts)
-    with c2:
-        st.write("③ 距離")
-        d_sub = st.columns([3, 1])
-        calc_dist = float(d_sub[0].number_input("距離", value=5000, step=500, key="m2_d", label_visibility="collapsed"))
-        d_sub[1].write("m")
+    calc_secs = time_input(c1, "合計時間", "m2_tm", "m2_ts")
+    calc_dist = distance_input(c2, "距離 (m)", "m2_d")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 計算されたAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
-    with c1:
-        st.write("② 測定時間")
-        t_sub = st.columns(2)
-        v_tm = t_sub[0].number_input("分", min_value=0, value=20, step=1, key="m3_tm")
-        v_ts = t_sub[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m3_ts")
-        calc_secs = float((v_tm * 60) + v_ts)
-    with c2:
-        st.write("③ 目標Average")
-        a_sub = st.columns(2)
-        v_am = a_sub[0].number_input("分", min_value=0, value=1, step=1, key="m3_am")
-        v_as = a_sub[1].number_input("秒", min_value=0, max_value=59, value=50, step=1, key="m3_as")
-        calc_ave = float((v_am * 60) + v_as)
+    calc_secs = time_input(c1, "測定時間", "m3_tm", "m3_ts")
+    calc_ave = time_input(c2, "目標Average", "m3_am", "m3_as")
     if calc_ave > 0: calc_dist = (calc_secs / calc_ave) * 500
     st.info(f"④ 想定される合計目標距離: **{calc_dist:.1f} m**")
 
-# --- レースプラン作成ボタン ---
 st.markdown("---")
 if st.button("⑤ レースプランを作成", type="primary"):
     st.session_state.update({
-        "active_plan_flag": True, 
-        "fixed_ave_seconds": calc_ave, 
-        "fixed_distance_m": calc_dist, 
-        "fixed_total_seconds": calc_secs, 
-        "fixed_calc_mode": "time_base" if mode_idx >= 2 else "distance_base", 
+        "active_plan_flag": True, "fixed_ave_seconds": calc_ave, "fixed_distance_m": calc_dist,
+        "fixed_total_seconds": calc_secs, "fixed_calc_mode": "time_base" if mode_idx >= 2 else "distance_base",
         "fixed_mode_idx": mode_idx
     })
     st.rerun()
 
-# --- レースプラン調整・結果表示 ---
 if st.session_state["active_plan_flag"]:
-    base_ave = st.session_state["fixed_ave_seconds"]
-    dist_total = st.session_state["fixed_distance_m"]
-    secs_total = st.session_state["fixed_total_seconds"]
-    calc_mode = st.session_state["fixed_calc_mode"]
-
+    base_ave, dist_total, secs_total, calc_mode = st.session_state["fixed_ave_seconds"], st.session_state["fixed_distance_m"], st.session_state["fixed_total_seconds"], st.session_state["fixed_calc_mode"]
     st.subheader("⏱️ 各Qの調整")
     if st.button("このプランをリセット"):
         for i in range(1, 5): st.session_state[f"q{i}_offset_sec"] = 0.0
@@ -121,24 +92,15 @@ if st.session_state["active_plan_flag"]:
         c1.write(f"**{i}Q**")
         q_sec = base_ave + st.session_state.get(f"q{i}_offset_sec", 0.0)
         c2.write(f"**{int(q_sec//60):02d}:{q_sec%60:04.1f}**")
-        
-        btn_c1, btn_c2 = c3.columns(2)
-        if btn_c1.button("➕", key=f"p_{i}"): st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) + 0.5; st.rerun()
-        if btn_c2.button("➖", key=f"m_{i}"): st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) - 0.5; st.rerun()
-        
-        # 集計計算
+        b1, b2 = c3.columns(2)
+        if b1.button("➕", key=f"p_{i}"): st.session_state[f"q{i}_offset_sec"] += 0.5; st.rerun()
+        if b2.button("➖", key=f"m_{i}"): st.session_state[f"q{i}_offset_sec"] -= 0.5; st.rerun()
         if calc_mode == 'distance_base':
-            this_dist = dist_total / 4
-            this_sec = q_sec * (this_dist / 500)
-            p_total_secs += this_sec
-            c4.write(f"`{int(this_sec//60):02d}:{this_sec%60:04.1f}`")
+            ts = q_sec * ((dist_total / 4) / 500); p_total_secs += ts
+            c4.write(f"`{int(ts//60):02d}:{ts%60:04.1f}`")
         else:
-            this_sec = secs_total / 4
-            this_dist = (this_sec / q_sec) * 500 if q_sec > 0 else 0
-            p_total_dist += this_dist
-            c4.write(f"`{this_dist:.1f} m`")
-
-    # --- 過不足の表示 ---
+            td = (secs_total / 4 / q_sec) * 500 if q_sec > 0 else 0; p_total_dist += td
+            c4.write(f"`{td:.1f} m`")
     st.markdown("---")
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
