@@ -101,38 +101,54 @@ elif mode_idx == 1:
 elif mode_idx == 2:
     current_type = "time_base"
     
-    # 全体をまず左（②時間）と右（③距離）の2列に分ける
-    top_col1, top_col2 = st.columns(2)
+    # 枠全体の左右分割：左側に「②合計時間」、右側に「③距離」を配置
+    main_col1, main_col2 = st.columns(2)
     
-    with top_col1:
+    with main_col1:
         st.write("② 合計時間")
-        # 時間の中でさらに「分」「秒」を横並びにするための列分割（単位用カラムも用意）
-        time_cols = st.columns([2, 1, 2, 1])
-        with time_cols[0]:
-            v_tm = st.number_input("分ラベル", min_value=0, max_value=120, value=20, step=1, key="m2_tm", label_visibility="collapsed", on_change=clear_plan_states)
-        with time_cols[1]:
-            st.markdown("<div style='padding-top: 10px;'>分</div>", unsafe_html=True)
-        with time_cols[2]:
-            v_ts = st.number_input("秒ラベル", min_value=0, max_value=59, value=0, step=1, key="m2_ts", label_visibility="collapsed", on_change=clear_plan_states)
-        with time_cols[3]:
-            st.markdown("<div style='padding-top: 10px;'>秒</div>", unsafe_html=True)
+        # HTMLのテーブルを使い、入力欄と単位を完全に横一行に固定します
+        time_html = """
+        <table style="width:100%; border:none; border-collapse:collapse;">
+            <tr style="border:none;">
+                <td style="width:35%; border:none; padding:0;"><div id="m2_min_placeholder"></div></td>
+                <td style="width:15%; border:none; padding:0 5px; vertical-align:middle; font-size:16px;">分</td>
+                <td style="width:35%; border:none; padding:0;"><div id="m2_sec_placeholder"></div></td>
+                <td style="width:15%; border:none; padding:0 5px; vertical-align:middle; font-size:16px;">秒</td>
+            </tr>
+        </table>
+        """
+        # 分と秒の入力欄を配置
+        t_sub1, t_sub2, t_sub3, t_sub4 = st.columns([3.5, 1.5, 3.5, 1.5])
+        with t_sub1:
+            v_tm = st.number_input("分", min_value=0, max_value=120, value=20, step=1, key="m2_tm", label_visibility="collapsed", on_change=clear_plan_states)
+        with t_sub2:
+            st.markdown("<div style='padding-top: 5px; font-size: 15px;'>分</div>", unsafe_html=True)
+        with t_sub3:
+            v_ts = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts", label_visibility="collapsed", on_change=clear_plan_states)
+        with t_sub4:
+            st.markdown("<div style='padding-top: 5px; font-size: 15px;'>秒</div>", unsafe_html=True)
+            
         tmp_secs = (v_tm * 60) + v_ts
         
-    with top_col2:
+    with main_col2:
         st.write("③ 距離")
-        # 距離マスの右側に「m」を置くための列分割
-        dist_cols = st.columns([5, 1])
-        with dist_cols[0]:
-            v_dist = st.number_input("距離ラベル", value=5000, step=500, key="m2_d", label_visibility="collapsed", on_change=clear_plan_states)
-        with dist_cols[1]:
-            st.markdown("<div style='padding-top: 10px;'>m</div>", unsafe_html=True)
+        # 距離と「m」を横並びにする
+        d_sub1, d_sub2 = st.columns([8, 2])
+        with d_sub1:
+            v_dist = st.number_input("距離", value=5000, step=500, key="m2_d", label_visibility="collapsed", on_change=clear_plan_states)
+        with d_sub2:
+            st.markdown("<div style='padding-top: 5px; font-size: 15px;'>m</div>", unsafe_html=True)
+            
         tmp_dist = v_dist
         
     if tmp_dist > 0:
         tmp_ave = tmp_secs / (tmp_dist / 500)
+    else:
+        tmp_ave = 0.0
         
-    # ②と③の列分割（top_col）の外に出すことで、必ず2つのマスの下に縦並びで表示されます
-    st.write("")  # 少し隙間を空ける
+    # 【最重要】main_colのブロック（with）から完全に外に出す
+    # これにより、右寄りが解消され、②と③の真下にフルサイズでドカンと表示されます
+    st.write("") 
     st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
