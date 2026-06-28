@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
-st.markdown("# 🛶 エルゴ・レースプラン<br>シミュレーター", unsafe_allow_html=True)
+st.markdown("#エルゴ・<br>レースプラン<br>シミュレーター", unsafe_allow_html=True)
 st.markdown("---")
 
 if "active_plan_flag" not in st.session_state:
