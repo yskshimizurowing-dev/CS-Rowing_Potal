@@ -87,7 +87,6 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    # 20分測定で5000mなどを指定する、時間と距離からAverageを出すモード
     current_type = "distance_base"
     with col1:
         st.write("② 合計時間")
@@ -170,36 +169,59 @@ if st.session_state["active_plan_flag"]:
     st.write("")
     running_q_times = []
 
-    # 1Q〜4Qの増減ボタン
+    # 1Q〜4Qの表示
     for i in range(1, 5):
-        c_name, c_plus, c_minus, c_result = st.columns([2, 1, 1, 3])
-        with c_name:
-            st.markdown(f"### **{i}Q**")
-        with c_plus:
-            if st.button("➕", key=f"p_btn_{i}"):
-                st.session_state[f"q{i}_offset_sec"] += 0.5
-                st.rerun()
-        with c_minus:
-            if st.button("➖", key=f"m_btn_{i}"):
-                st.session_state[f"q{i}_offset_sec"] -= 0.5
-                st.rerun()
+        # 左右の幅をシンプルに2分割（ボタンエリア / 結果テキストエリア）
+        c_left, c_right = st.columns([2, 3])
+        
+        with c_left:
+            # 縦並びだとズレやすいため、横並びの小さなボタンを配置
+            st.markdown(f"**{i}Q**")
+            btn_col1, btn_col2 = st.columns(2)
+            with btn_col1:
+                if st.button("➕", key=f"p_btn_{i}"):
+                    st.session_state[f"q{i}_offset_sec"] += 0.5
+                    st.rerun()
+            with btn_col2:
+                if st.button("➖", key=f"m_btn_{i}"):
+                    st.session_state[f"q{i}_offset_sec"] -= 0.5
+                    st.rerun()
                 
         final_q_sec = base_ave + st.session_state[f"q{i}_offset_sec"]
         if final_q_sec < 0:
             final_q_sec = 0.0
         running_q_times.append(final_q_sec)
         
-        with c_result:
-            st.markdown(f"### `{int(final_q_sec // 60):02d}:{final_q_sec % 60:04.1f}`")
+        q_m = int(final_q_sec // 60)
+        q_s = final_q_sec % 60
+        
+        with c_right:
+            # ★確実に表示させるため、改行（Markdown）を使い、スプリットの真下に計算結果を出します
+            st.markdown(f"### 🏃 `{q_m:02d}:{q_s:04.1f}` /500m")
+            
+            if calc_mode == "distance_base":
+                # 距離固定時：そのQにかかる実際の時間を算出
+                q_dist_factor = (dist_total / 4) / 500
+                this_q_total_secs = final_q_sec * q_dist_factor
+                this_q_m = int(this_q_total_secs // 60)
+                this_q_s = this_q_total_secs % 60
+                st.caption(f"⏱️ **このQのタイム: {this_q_m}分{this_q_s:04.1f}秒**")
+            else:
+                # 時間固定時：そのQで進む実際の距離を算出
+                q_time_slice = secs_total / 4
+                if final_q_sec > 0:
+                    this_q_dist = (q_time_slice / final_q_sec) * 500
+                else:
+                    this_q_dist = 0.0
+                st.caption(f"📏 **このQの距離: {this_q_dist:.1f} m**")
+        
+        st.write("") # 各Qの間に少し隙間を空ける
 
     st.markdown("---")
 
-    # --- 最終結果表示エリア（★計算ロジックを完全に修正しました） ---
+    # --- 最終結果表示エリア ---
     if calc_mode == "distance_base":
-        # 【距離固定系】各Qのタイム ＝ 各QのAverage秒数 × (各Qの距離 / 500m)
-        # 各Qの距離は dist_total / 4 なので、500mで割ると 「dist_total / 2000」倍 になります
         q_dist_factor = (dist_total / 4) / 500
-        
         total_p_secs = 0.0
         for q_sec in running_q_times:
             total_p_secs += q_sec * q_dist_factor
@@ -218,7 +240,6 @@ if st.session_state["active_plan_flag"]:
             st.info(f"💡 **目標より {abs(diff_secs):.1f} 秒速いです。** あと {abs(diff_secs):.1f} 秒余裕があります。")
             
     else:
-        # 【時間固定系】
         q_time_slice = secs_total / 4
         calculated_total_dist = 0.0
         for q_s_val in running_q_times:
