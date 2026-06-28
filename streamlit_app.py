@@ -69,7 +69,7 @@ with col4:
         st.toast("測定記録データベースは現在開発中です！")
 with col5:
     if st.button("🧮\n\nAverage計算", use_container_width=True):
-        st.toast("Average計算は現在開発中です！")
+        st.switch_page("./pages/calculator.py")
 with col6:
     if st.button("🔧\n\nリギング", use_container_width=True):
         st.toast("リギングサポートは現在開発中です！")
