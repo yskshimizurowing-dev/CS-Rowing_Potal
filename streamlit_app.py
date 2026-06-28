@@ -55,7 +55,7 @@ st.markdown('''
 col1, col2, col3 = st.columns(3)
 with col1:    # トレーニングメニュー
     if st.session_state.get("logged_in"):
-    if st.button("🏋️\n\nトレーニングメニュー"):
+    #if st.button("🏋️\n\nトレーニングメニュー"):
         secret_token = "your_secret_key_2026"
         gas_url = f"https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec?token={secret_token}"
 
