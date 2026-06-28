@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
-st.title("エルゴ・レースプラン/nシミュレーター")
+st.title("エルゴ・レースプラン<br>シミュレーター")
 st.write("カテゴリを選んで目標数値を入力し、レースプランを作成します。")
 st.markdown("---")
 
