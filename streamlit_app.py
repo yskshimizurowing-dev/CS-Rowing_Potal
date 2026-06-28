@@ -82,9 +82,8 @@ with col7:
 with col8:
     if st.button("📊\n\n動画解析", use_container_width=True):
         st.toast("動画解析ツールは現在開発中です！")
-with col9:
-    # Googleドライブ（URLが用意できたら書き換えてください）
-    st.link_button("☁️\n\n共有ドライブ", "https://drive.google.com/drive/folders/...", use_container_width=True)
+with col9:    # Googleドライブ
+    st.link_button("☁️\n\n共有ドライブ", "https://drive.google.com/drive/folders/0AKWbU0VyiymNUk9PVA", use_container_width=True)
 
 # スマートフォンで見やすくするための見た目調整CSS
 st.markdown("""
