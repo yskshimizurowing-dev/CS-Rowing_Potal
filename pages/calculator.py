@@ -85,13 +85,27 @@ if st.session_state["active_plan_flag"]:
 
     p_total_secs, p_total_dist = 0.0, 0.0
     for i in range(1, 5):
+        # 画面描画用に値を安全に取得（なければ0.0）
+        current_offset = st.session_state.get(f"q{i}_offset_sec", 0.0)
+        
         c1, c2, c3, c4 = st.columns([1, 2, 2, 3])
         c1.write(f"**{i}Q**")
         q_sec = base_ave + st.session_state.get(f"q{i}_offset_sec", 0.0)
+        q_sec = base_ave + current_offset
         c2.write(f"**{int(q_sec//60):02d}:{q_sec%60:04.1f}**")
+        
         b1, b2 = c3.columns(2)
         if b1.button("➕", key=f"p_{i}"): st.session_state[f"q{i}_offset_sec"] += 0.5; st.rerun()
         if b2.button("➖", key=f"m_{i}"): st.session_state[f"q{i}_offset_sec"] -= 0.5; st.rerun()
+        
+        # 修正ポイント: 直接 += を使わず、明示的に代入する
+        if b1.button("➕", key=f"p_{i}"): 
+            st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) + 0.5
+            st.rerun()
+            
+        if b2.button("➖", key=f"m_{i}"): 
+            st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) - 0.5
+            st.rerun()
         if calc_mode == 'distance_base':
             ts = q_sec * ((dist_total / 4) / 500); p_total_secs += ts
             c4.write(f"`{int(ts//60):02d}:{ts%60:04.1f}`")
@@ -101,7 +115,6 @@ if st.session_state["active_plan_flag"]:
     st.markdown("---")
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
-        st.write(f"合計タイム: {int(p_total_secs//60)}分{p_total_secs%60:.1f}秒")
         st.write(f"合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:.1f}")
         if abs(diff) < 0.1: st.success("設定タイムと一致")
         elif diff > 0: st.error(f"⚠️ 設定タイムに対し {diff:.1f} 秒超過")
