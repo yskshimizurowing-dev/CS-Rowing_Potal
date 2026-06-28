@@ -31,12 +31,18 @@ if mode_idx in [0, 1]:
     s = c2.number_input("秒", value=0)
     calc_secs = m * 60 + s
     calc_ave = calc_secs / (dist / 500) if mode_idx == 0 and dist > 0 else calc_secs
+    # ④の表示を復元
+    if mode_idx == 0: st.info(f"④ Average: **{int(calc_ave//60)}:{calc_ave%60:05.2f}** / 500m")
+    else: st.info(f"④ 合計タイム: **{int(calc_secs//60)}分{calc_secs%60:05.2f}秒**")
 else:
     m = c1.number_input("② 分", value=20)
     s = c1.number_input("秒", value=0)
     dist = c2.number_input("③ 距離 (m)", value=5000, step=500)
     calc_secs = m * 60 + s
     calc_ave = calc_secs / (dist / 500) if mode_idx == 2 and dist > 0 else 0
+    # ④の表示を復元
+    if mode_idx == 2: st.info(f"④ Average: **{int(calc_ave//60)}:{calc_ave%60:05.2f}** / 500m")
+    else: st.info(f"④ 合計距離: **{dist:.1f} m**")
 
 if st.button("⑤ レースプランを作成", type="primary"):
     st.session_state.update({
@@ -64,7 +70,6 @@ if st.session_state["active_plan_flag"]:
         if f"q{i}_offset_sec" not in st.session_state: st.session_state[f"q{i}_offset_sec"] = 0.0
         q_sec = base_ave + st.session_state[f"q{i}_offset_sec"]
         
-        # Ave横に結果を配置。秒数は常に2桁表示(:05.2f)
         if calc_mode == 'distance_base':
             ts = q_sec * ((dist_total / 4) / 500); p_total_secs += ts
             res_display = f"{int(ts//60)}:{ts%60:05.2f}"
