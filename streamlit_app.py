@@ -54,13 +54,23 @@ st.markdown('''
 # 【1行目】
 col1, col2, col3 = st.columns(3)
 with col1:    # トレーニングメニュー
-    st.link_button("🏋️\n\nトレーニングメニュー", "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", use_container_width=True)
+    if st.button("🏋️\n\nトレーニングメニュー"):
+        secret_token = "your_secret_key_2026"
+        gas_url = f"https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec?token={secret_token}"
+        # 履歴を残さず、同じタブで即座に遷移させる
+        st.components.v1.html(f"""
+            <script>
+                window.location.replace("{gas_url}");
+            </script>
+        """, height=0)
+        
+    #st.link_button("🏋️\n\nトレーニングメニュー", "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", use_container_width=True)
         
 with col2:
     if st.button("📋\n\nホワイトボード", use_container_width=True):
         st.switch_page("./pages/whiteboard.py")
 with col3:    # 欠席連絡
-    st.link_button("📝\n\n欠席連絡", "https://docs.google.com/forms/d/e/1FAIpQLSdZWWNO0GpPOpadbspDl_YPgA_jx1Q2i4xUUdH44IinvhGY_w/viewform?usp=dialog", use_container_width=True)
+    st.link_button("📝\n\n欠席連絡", "https://forms.gle/BRUbZgVGwcyvKd7v6", use_container_width=True)
 
 # 【2行目】
 col4, col5, col6 = st.columns(3)
