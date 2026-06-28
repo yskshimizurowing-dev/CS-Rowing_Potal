@@ -115,4 +115,13 @@ if st.session_state["active_plan_flag"]:
     st.markdown("---")
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
-        st.write(f"合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:0
+        st.write(f"合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:04.1f}")
+        if abs(diff) < 0.1: st.success("🎉 目標とピッタリ！")
+        elif diff > 0: st.error(f"⚠️ {diff:.1f}秒 遅い")
+        else: st.info(f"💡 {abs(diff):.1f}秒 速い")
+    else:
+        diff = p_total_dist - dist_total
+        st.write(f"合計距離: {p_total_dist:.1f} m")
+        if abs(diff) < 0.5: st.success("🎉 目標とピッタリ！")
+        elif diff > 0: st.success(f"🚀 {diff:.1f}m 多い")
+        else: st.error(f"⚠️ {abs(diff):.1f}m 不足")
