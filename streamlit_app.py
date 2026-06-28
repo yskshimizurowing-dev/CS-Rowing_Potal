@@ -10,7 +10,7 @@ SECRET_TOKEN = st.secrets["GAS_TOKEN"]
 # ※ すべてのURLを Secrets.toml に登録し、ここではキー名を指定します
 BUTTONS = [
     {"label": "🏋️\n\nトレーニング", "key": "URL_TRAINING", "type": "gas"},
-    {"label": "📋\n\nホワイトボード", "url": "pages/whiteboard.py", "type": "page"},
+    {"label": "📋\n\nホワイトボード", "key": "URL_WHITEBOARD", "type": "gas"},
     {"label": "📝\n\n欠席連絡", "key": "URL_FORM", "type": "link"},
     {"label": "🚣\n\n測定記録DB", "key": "URL_DB", "type": "gas"},
     {"label": "🧮\n\nAverage計算", "url": "pages/calculator.py", "type": "page"},
