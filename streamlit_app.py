@@ -1,5 +1,20 @@
 import streamlit as st
 
+import streamlit as st
+import os
+
+# デバッグ用：現在読み込めているキーを表示
+st.write("読み込めたキー一覧:", list(st.secrets.keys()))
+
+# ファイルパスを確認
+if os.path.exists(".streamlit/secrets.toml"):
+    st.success(".streamlit/secrets.toml は存在します")
+else:
+    st.error(".streamlit/secrets.toml が見つかりません！場所を確認してください")
+
+SECRET_TOKEN = st.secrets["GAS_TOKEN"]
+
+
 # --- 1. 設定・定義 ---
 SECRET_TOKEN = st.secrets["GAS_TOKEN"]
 
