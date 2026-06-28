@@ -4,16 +4,17 @@ import streamlit as st
 SECRET_TOKEN = st.secrets["GAS_TOKEN"]
 
 # ボタンの設定リスト
+# ※ すべてのURLを Secrets.toml に登録し、ここではキー名を指定します
 BUTTONS = [
     {"label": "🏋️\n\nトレーニング", "key": "URL_TRAINING", "type": "gas"},
     {"label": "📋\n\nホワイトボード", "url": "pages/whiteboard.py", "type": "page"},
     {"label": "📝\n\n欠席連絡", "key": "URL_FORM", "type": "link"},
-    {"label": "🚣\n\n測定記録DB", "url": "https://script.google.com/macros/s/YYYY/exec", "type": "gas"},
+    {"label": "🚣\n\n測定記録DB", "key": "URL_DB", "type": "gas"},
     {"label": "🧮\n\nAverage計算", "url": "pages/calculator.py", "type": "page"},
-    {"label": "🔧\n\nリギング", "url": "https://script.google.com/macros/s/ZZZZ/exec", "type": "gas"},
+    {"label": "🔧\n\nリギング", "key": "URL_RIGGING", "type": "gas"},
     {"label": "📦\n\n備品管理", "url": "dev", "type": "dev"},
     {"label": "📊\n\n動画解析", "url": "dev", "type": "dev"},
-    {"label": "☁️\n\n共有ドライブ", "url": "https://drive.google.com/drive/folders/0AKWbU0VyiymNUk9PVA", "type": "link"},
+    {"label": "☁️\n\nURL_DRIVE", "key": "URL_DRIVE", "type": "link"}, # 共有ドライブもKey化しました
 ]
 
 # --- 2. 基本設定 ---
@@ -46,30 +47,27 @@ st.markdown('''
 ''', unsafe_allow_html=True)
 
 # --- 4. ログイン認証確認とボタン描画 ---
-# st.user はStreamlit Cloudの認証機能が有効な場合、ログイン時にユーザー情報が入ります
 if st.user is not None:
-    # 3x3 のレイアウトを生成
     for i in range(0, 9, 3):
         cols = st.columns(3)
         for j, col in enumerate(cols):
             btn = BUTTONS[i + j]
             with col:
+                # リンク先URLの取得ロジック（URL直接指定 or Secrets参照）
+                target_url = st.secrets.get(btn["key"]) if "key" in btn else btn.get("url")
+
                 if btn["type"] == "gas":
-                    # トークンを付与して遷移
-                    url_with_token = f"{btn['url']}?token={SECRET_TOKEN}"
+                    url_with_token = f"{target_url}?token={SECRET_TOKEN}"
                     st.link_button(btn["label"], url_with_token, use_container_width=True)
                 
                 elif btn["type"] == "link":
-                    # 通常のリンク遷移
-                    st.link_button(btn["label"], btn["url"], use_container_width=True)
+                    st.link_button(btn["label"], target_url, use_container_width=True)
                 
                 elif btn["type"] == "page":
-                    # Streamlit内ページ遷移
                     if st.button(btn["label"], use_container_width=True):
                         st.switch_page(btn["url"])
                 
                 elif btn["type"] == "dev":
-                    # 開発中機能
                     if st.button(btn["label"], use_container_width=True):
                         st.toast(f"{btn['label'].splitlines()[-1]}は現在開発中です！")
 else:
