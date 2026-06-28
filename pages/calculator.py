@@ -24,23 +24,24 @@ selected_menu = st.selectbox("① カテゴリー選択", menus, index=default_i
 mode_idx = menus.index(selected_menu)
 
 # --- 入力 ---
-c1, c2 = st.columns(2)
+# 分と秒を一つのブロックとして扱うための列構成
+c_main = st.columns(2)
 if mode_idx in [0, 1]:
-    dist = c1.number_input("② 距離 (m)", value=2000, step=500)
-    m = c2.number_input("③ 分", value=2)
-    s = c2.number_input("秒", value=0)
+    dist = c_main[0].number_input("② 距離 (m)", value=2000, step=500)
+    c_time = c_main[1].columns(2)
+    m = c_time[0].number_input("③ 分", value=2)
+    s = c_time[1].number_input("秒", value=0)
     calc_secs = m * 60 + s
     calc_ave = calc_secs / (dist / 500) if mode_idx == 0 and dist > 0 else calc_secs
-    # ④の表示を復元
     if mode_idx == 0: st.info(f"④ Average: **{int(calc_ave//60)}:{calc_ave%60:05.2f}** / 500m")
     else: st.info(f"④ 合計タイム: **{int(calc_secs//60)}分{calc_secs%60:05.2f}秒**")
 else:
-    m = c1.number_input("② 分", value=20)
-    s = c1.number_input("秒", value=0)
-    dist = c2.number_input("③ 距離 (m)", value=5000, step=500)
+    c_time = c_main[0].columns(2)
+    m = c_time[0].number_input("② 分", value=20)
+    s = c_time[1].number_input("秒", value=0)
+    dist = c_main[1].number_input("③ 距離 (m)", value=5000, step=500)
     calc_secs = m * 60 + s
     calc_ave = calc_secs / (dist / 500) if mode_idx == 2 and dist > 0 else 0
-    # ④の表示を復元
     if mode_idx == 2: st.info(f"④ Average: **{int(calc_ave//60)}:{calc_ave%60:05.2f}** / 500m")
     else: st.info(f"④ 合計距離: **{dist:.1f} m**")
 
@@ -84,7 +85,6 @@ if st.session_state["active_plan_flag"]:
         if b2.button("➖", key=f"m_{i}"): st.session_state[f"q{i}_offset_sec"] -= 0.5; st.rerun()
         st.markdown("---")
 
-    # --- 判定 ---
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
         st.write(f"合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:05.2f}")
