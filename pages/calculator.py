@@ -52,7 +52,9 @@ tmp_dist = 0.0
 tmp_secs = 0.0
 tmp_ave = 0.0
 
+# ★各メニューごとの「固定される軸（距離固定か時間固定か）」を完全に整理
 if mode_idx == 0:
+    # 距離固定（例：2000mを8分で漕ぐ → 各Qは500m固定なので、出すべきは「Qタイム」）
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m0_d", on_change=clear_plan_states)
@@ -70,6 +72,7 @@ if mode_idx == 0:
         st.info(f"④ 必要な全体のAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
+    # 距離固定（例：2000mをAve2:00で漕ぐ → 各Qは500m固定なので、出すべきは「Qタイム」）
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m1_d", on_change=clear_plan_states)
@@ -87,6 +90,7 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
+    # 距離固定（例：20分で5000mを狙う → 総距離5000mがターゲットなので、各Qは1250m固定 ＝ 出すべきは「Qタイム」）
     current_type = "distance_base"
     with col1:
         st.write("② 合計時間")
@@ -105,6 +109,7 @@ elif mode_idx == 2:
         st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
+    # 時間固定（例：20分エルゴでAve1:50 → 時間が5分ずつに4等分されるので、出すべきは「Q距離」）
     current_type = "time_base"
     with col1:
         st.write("② 合計の測定時間")
@@ -196,16 +201,16 @@ if st.session_state["active_plan_flag"]:
         with c_right:
             st.markdown(f"### 🏃 `{q_m:02d}:{q_s:04.1f}` /500m")
             
-            # ★ ご指摘に基づき、表示ロジックを入れ替えました！
+            # ★ 判定フラグを完全に修正：距離ベース（固定）の時はタイム、時間ベース（固定）の時は距離を出す
             if calc_mode == "distance_base":
-                # 【距離測定（固定）の時】 ＝＞ 「Qごとの実際のタイム」を計算して表示
+                # 距離固定（メニュー0,1,2番）：距離が固定なので、そのQ（1/4距離）にかかる「実際のタイム」を表示
                 q_dist_factor = (dist_total / 4) / 500
                 this_q_total_secs = final_q_sec * q_dist_factor
                 this_q_m = int(this_q_total_secs // 60)
                 this_q_s = this_q_total_secs % 60
                 st.caption(f"⏱️ **このQのタイム: {this_q_m}分{this_q_s:04.1f}秒**")
             else:
-                # 【時間測定（固定）の時】 ＝＞ 「Qごとの実際の距離」を計算して表示
+                # 時間固定（メニュー3番）：時間が固定なので、そのQ（1/4時間）で進む「実際の距離」を表示
                 q_time_slice = secs_total / 4
                 if final_q_sec > 0:
                     this_q_dist = (q_time_slice / final_q_sec) * 500
