@@ -54,15 +54,28 @@ st.markdown('''
 # 【1行目】
 col1, col2, col3 = st.columns(3)
 with col1:    # トレーニングメニュー
+    if st.session_state.get("logged_in"):
     if st.button("🏋️\n\nトレーニングメニュー"):
         secret_token = "your_secret_key_2026"
         gas_url = f"https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec?token={secret_token}"
-        # 履歴を残さず、同じタブで即座に遷移させる
-        st.components.v1.html(f"""
-            <script>
-                window.location.replace("{gas_url}");
-            </script>
-        """, height=0)
+
+        button_html = f"""
+        <a href="{gas_url}" target="_top" style="
+            display: block;
+            width: 100%;
+            background-color: #2563eb;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        ">
+            🏋️\n\nトレーニングメニュー
+        </a>
+        """
+        st.components.v1.html(button_html, height=60)    
         
     #st.link_button("🏋️\n\nトレーニングメニュー", "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", use_container_width=True)
         
