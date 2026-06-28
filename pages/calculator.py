@@ -171,11 +171,9 @@ if st.session_state["active_plan_flag"]:
 
     # 1Q〜4Qの表示
     for i in range(1, 5):
-        # 左右の幅をシンプルに2分割（ボタンエリア / 結果テキストエリア）
         c_left, c_right = st.columns([2, 3])
         
         with c_left:
-            # 縦並びだとズレやすいため、横並びの小さなボタンを配置
             st.markdown(f"**{i}Q**")
             btn_col1, btn_col2 = st.columns(2)
             with btn_col1:
@@ -196,18 +194,18 @@ if st.session_state["active_plan_flag"]:
         q_s = final_q_sec % 60
         
         with c_right:
-            # ★確実に表示させるため、改行（Markdown）を使い、スプリットの真下に計算結果を出します
             st.markdown(f"### 🏃 `{q_m:02d}:{q_s:04.1f}` /500m")
             
+            # ★ ご指摘に基づき、表示ロジックを入れ替えました！
             if calc_mode == "distance_base":
-                # 距離固定時：そのQにかかる実際の時間を算出
+                # 【距離測定（固定）の時】 ＝＞ 「Qごとの実際のタイム」を計算して表示
                 q_dist_factor = (dist_total / 4) / 500
                 this_q_total_secs = final_q_sec * q_dist_factor
                 this_q_m = int(this_q_total_secs // 60)
                 this_q_s = this_q_total_secs % 60
                 st.caption(f"⏱️ **このQのタイム: {this_q_m}分{this_q_s:04.1f}秒**")
             else:
-                # 時間固定時：そのQで進む実際の距離を算出
+                # 【時間測定（固定）の時】 ＝＞ 「Qごとの実際の距離」を計算して表示
                 q_time_slice = secs_total / 4
                 if final_q_sec > 0:
                     this_q_dist = (q_time_slice / final_q_sec) * 500
@@ -215,7 +213,7 @@ if st.session_state["active_plan_flag"]:
                     this_q_dist = 0.0
                 st.caption(f"📏 **このQの距離: {this_q_dist:.1f} m**")
         
-        st.write("") # 各Qの間に少し隙間を空ける
+        st.write("") 
 
     st.markdown("---")
 
