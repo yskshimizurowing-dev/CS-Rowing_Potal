@@ -6,7 +6,7 @@ st.title("🛶 エルゴ・レースプランシミュレーター")
 st.write("カテゴリを選んで目標数値を入力し、レースプランを作成・シミュレーションします。")
 st.markdown("---")
 
-# --- セッション状態の初期化（変数名を完全に一新） ---
+# --- セッション状態の初期化 ---
 if "active_plan_flag" not in st.session_state:
     st.session_state["active_plan_flag"] = False
 if "fixed_ave_seconds" not in st.session_state:
@@ -48,14 +48,11 @@ mode_idx = menus.index(selected_menu)
 st.markdown("### **入力エリア**")
 col1, col2 = st.columns(2)
 
-# スクリプト実行ごとの一時計算用変数
 tmp_dist = 0.0
 tmp_secs = 0.0
 tmp_ave = 0.0
 
-# ★ここがバグの原因でした。各モードの計算ロジックと、最終判定の「タイプ」を完全に整理しました。
 if mode_idx == 0:
-    # 距離ベース（目標タイムに向かって4等分したタイムの過不足を競う）
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m0_d", on_change=clear_plan_states)
@@ -73,7 +70,6 @@ if mode_idx == 0:
         st.info(f"④ 必要な全体のAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
-    # 距離ベース（目標タイムに向かって4等分したタイムの過不足を競う）
     current_type = "distance_base"
     with col1:
         v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m1_d", on_change=clear_plan_states)
@@ -91,18 +87,18 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    # 距離ベース（合計時間から全体のタイムが固定されるため、これも4等分したタイムの過不足を競うタイプ）
+    # 20分測定で5000mなどを指定する、時間と距離からAverageを出すモード
     current_type = "distance_base"
     with col1:
         st.write("② 合計時間")
         ctm, cts = st.columns(2)
         with ctm:
-            v_tm = st.number_input("分", min_value=0, max_value=120, value=7, step=1, key="m2_tm", on_change=clear_plan_states)
+            v_tm = st.number_input("分", min_value=0, max_value=120, value=20, step=1, key="m2_tm", on_change=clear_plan_states)
         with cts:
-            v_ts = st.number_input("秒", min_value=0, max_value=59, value=30, step=1, key="m2_ts", on_change=clear_plan_states)
+            v_ts = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts", on_change=clear_plan_states)
         tmp_secs = (v_tm * 60) + v_ts
     with col1:
-        v_dist = st.number_input("③ 距離 (m)", value=2000, step=500, key="m2_d", on_change=clear_plan_states)
+        v_dist = st.number_input("③ 距離 (m)", value=5000, step=500, key="m2_d", on_change=clear_plan_states)
     tmp_dist = v_dist
     if tmp_dist > 0:
         tmp_ave = tmp_secs / (tmp_dist / 500)
@@ -110,7 +106,6 @@ elif mode_idx == 2:
         st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
-    # 時間ベース（20分測定など：時間が固定され、各QのAve変化によって「最終的な総距離」の過不足を競う）
     current_type = "time_base"
     with col1:
         st.write("② 合計の測定時間")
@@ -133,7 +128,7 @@ elif mode_idx == 3:
         st.info(f"④ 想定される合計の目標距離: **{tmp_dist:.1f} m**")
 
 
-# ボタンを押す前は、入力値を常にセッション状態に最新同期し続ける
+# ロック前はセッションに同期
 if not st.session_state["active_plan_flag"]:
     st.session_state["fixed_ave_seconds"] = tmp_ave
     st.session_state["fixed_distance_m"] = tmp_dist
@@ -154,7 +149,6 @@ if st.button("⑤ レースプランを作成", type="primary"):
 
 # --- ⑥ レースプラン作成エリア ---
 if st.session_state["active_plan_flag"]:
-    # 完全にロックされた状態の数値を安全に使用
     base_ave = st.session_state["fixed_ave_seconds"]
     dist_total = st.session_state["fixed_distance_m"]
     secs_total = st.session_state["fixed_total_seconds"]
@@ -200,10 +194,16 @@ if st.session_state["active_plan_flag"]:
 
     st.markdown("---")
 
-    # --- 最終結果表示エリア（★ここが完全に分離して正しく動作します） ---
+    # --- 最終結果表示エリア（★計算ロジックを完全に修正しました） ---
     if calc_mode == "distance_base":
-        # 距離固定系（メニュー0, 1, 2番）
-        total_p_secs = sum(running_q_times)
+        # 【距離固定系】各Qのタイム ＝ 各QのAverage秒数 × (各Qの距離 / 500m)
+        # 各Qの距離は dist_total / 4 なので、500mで割ると 「dist_total / 2000」倍 になります
+        q_dist_factor = (dist_total / 4) / 500
+        
+        total_p_secs = 0.0
+        for q_sec in running_q_times:
+            total_p_secs += q_sec * q_dist_factor
+            
         diff_secs = total_p_secs - secs_total
         p_total_m = int(total_p_secs // 60)
         p_total_s = total_p_secs % 60
@@ -218,7 +218,7 @@ if st.session_state["active_plan_flag"]:
             st.info(f"💡 **目標より {abs(diff_secs):.1f} 秒速いです。** あと {abs(diff_secs):.1f} 秒余裕があります。")
             
     else:
-        # 時間固定系（メニュー3番：20分測定など）
+        # 【時間固定系】
         q_time_slice = secs_total / 4
         calculated_total_dist = 0.0
         for q_s_val in running_q_times:
