@@ -106,4 +106,141 @@ elif mode_idx == 3:
     with main_col3:
         v_am = st.number_input("③ 目標Average（分）", min_value=0, max_value=10, value=1, step=1, key="m3_am_f")
         v_as = st.number_input("③ 目標Average（秒）", min_value=0, max_value=59, value=50, step=1, key="m3_as_f")
-        calc_ave = float((v_am * 60)
+        calc_ave = float((v_am * 60) + v_as)
+        
+    if calc_ave > 0:
+        calc_dist = (calc_secs / calc_ave) * 500
+        
+    st.write("") 
+    st.info(f"④ 想定される合計の目標距離: **{calc_dist:.1f} m**")
+
+
+# --- ⑤ レースプランを作成 ボタン ---
+if f"q1_offset_sec" not in st.session_state:
+    for i in range(1, 5):
+        st.session_state[f"q{i}_offset_sec"] = 0.0
+
+if not st.session_state["active_plan_flag"]:
+    st.session_state["fixed_ave_seconds"] = calc_ave
+    st.session_state["fixed_distance_m"] = calc_dist
+    st.session_state["fixed_total_seconds"] = calc_secs
+    st.session_state["fixed_calc_mode"] = current_type
+    st.session_state["fixed_mode_idx"] = mode_idx
+
+st.markdown("---")
+
+if st.button("⑤ レースプランを作成", type="primary"):
+    st.session_state["active_plan_flag"] = True
+    st.session_state["fixed_ave_seconds"] = calc_ave
+    st.session_state["fixed_distance_m"] = calc_dist
+    st.session_state["fixed_total_seconds"] = calc_secs
+    st.session_state["fixed_calc_mode"] = current_type
+    st.session_state["fixed_mode_idx"] = mode_idx
+    st.rerun()
+
+
+# --- ⑥ レースプラン作成エリア ---
+if st.session_state["active_plan_flag"]:
+    base_ave = st.session_state["fixed_ave_seconds"]
+    dist_total = st.session_state["fixed_distance_m"]
+    secs_total = st.session_state["fixed_total_seconds"]
+    calc_mode = st.session_state["fixed_calc_mode"]
+
+    st.subheader(f"⏱️ 各Qの調整 (500m Average)")
+    
+    if st.button("このプランをリreset", type="secondary"):
+        for i in range(1, 5):
+            st.session_state[f"q{i}_offset_sec"] = 0.0
+        st.rerun()
+
+    st.write("")
+    
+    plan_total_secs = 0.0
+    plan_total_dist = 0.0
+
+    hc1, hc2, hc3, hc4 = st.columns([1, 2, 2, 3])
+    with hc1: st.caption("🔲 Q")
+    with hc2: st.caption("🏃 500m Ave")
+    with hc3: st.caption("➕ ➖")
+    if calc_mode == "distance_base":
+        with hc4: st.caption("⏱️ Qタイム")
+    else:
+        with hc4: st.caption("📏 Q距離")
+        
+    st.markdown("---")
+
+    for i in range(1, 5):
+        c_q, c_ave, c_btn, c_val = st.columns([1, 2, 2, 3])
+        
+        final_q_sec = base_ave + st.session_state.get(f"q{i}_offset_sec", 0.0)
+        if final_q_sec < 0:
+            final_q_sec = 0.0
+            
+        q_m = int(final_q_sec // 60)
+        q_s = final_q_sec % 60
+
+        if calc_mode == "distance_base":
+            this_q_dist = dist_total / 4
+            this_q_secs = final_q_sec * (this_q_dist / 500)
+        else:
+            this_q_secs = secs_total / 4
+            if final_q_sec > 0:
+                this_q_dist = (this_q_secs / final_q_sec) * 500
+            else:
+                this_q_dist = 0.0
+
+        plan_total_secs += this_q_secs
+        plan_total_dist += this_q_dist
+
+        with c_q:
+            st.write(f"**{i}Q**")
+            
+        with c_ave:
+            st.write(f"**{q_m:02d}:{q_s:04.1f}**")
+            
+        with c_btn:
+            b1, b2 = st.columns(2)
+            with b1:
+                if st.button("➕", key=f"p_btn_{i}"):
+                    st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) + 0.5
+                    st.rerun()
+            with b2:
+                if st.button("➖", key=f"m_btn_{i}"):
+                    st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) - 0.5
+                    st.rerun()
+                    
+        with c_val:
+            if calc_mode == "distance_base":
+                this_q_m = int(this_q_secs // 60)
+                this_q_s = this_q_secs % 60
+                st.write(f"`{this_q_m:02d}:{this_q_s:04.1f}`")
+            else:
+                st.write(f"`{this_q_dist:.1f} m`")
+
+    st.markdown("---")
+
+    # --- ⑦ 最終結果表示エリア ---
+    st.markdown("### **現在の合計**")
+    
+    if calc_mode == "distance_base":
+        p_total_m = int(plan_total_secs // 60)
+        p_total_s = plan_total_secs % 60
+        st.write(f"現在のプラン合計タイム: **{p_total_m}分{p_total_s:04.1f}秒** （目標タイム: {int(secs_total//60)}分{secs_total%60:04.1f}秒）")
+        
+        diff_secs = plan_total_secs - secs_total
+        if abs(diff_secs) < 0.01:
+            st.success("🎉 **目標タイムとピッタリ一致しています！完璧なレースプランです。**")
+        elif diff_secs > 0:
+            st.error(f"⚠️ **目標より {diff_secs:.1f} 秒遅いです。** あと {diff_secs:.1f} 秒縮めてください。")
+        else:
+            st.info(f"💡 **目標より {abs(diff_secs):.1f} 秒速いです。** あと {abs(diff_secs):.1f} 秒余裕があります。")
+    else:
+        st.write(f"現在のプラン合計距離: **{plan_total_dist:.1f} m** （目標距離: {dist_total:.1f} m）")
+        
+        diff_m = plan_total_dist - dist_total
+        if abs(diff_m) < 0.5:
+            st.success("🎉 **目標距離とピッタリ一致しています！完璧なペース配分です。**")
+        elif diff_m > 0:
+            st.success(f"🚀 **目標より {abs(diff_m):.1f} m 多く漕げます！ （ナイスプラン）**")
+        else:
+            st.error(f"⚠️ **目標より {abs(diff_m):.1f} m 不足しています。** あと少しペースを上げてください。")
