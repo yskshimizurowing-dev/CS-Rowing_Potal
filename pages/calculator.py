@@ -99,23 +99,25 @@ elif mode_idx == 1:
         st.info(f"④ 算出された合計タイム: **{int(tmp_secs // 60)}分{tmp_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    # 【修正】時間固定系（総時間が20分等でロックされ、1Qの時間も定まるため、出すべきはQ距離、競うべきは合計距離です）
+    # 2列に分けず、1列の中で上から順に「②時間」「③距離」「④計算結果」を表示させる
     current_type = "time_base"
-    with col1:
-        st.write("② 合計時間")
-        ctm, cts = st.columns(2)
-        with ctm:
-            v_tm = st.number_input("分", min_value=0, max_value=120, value=20, step=1, key="m2_tm", on_change=clear_plan_states)
-        with cts:
-            v_ts = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts", on_change=clear_plan_states)
-        tmp_secs = (v_tm * 60) + v_ts
-    with col1:
-        v_dist = st.number_input("③ 距離 (m)", value=5000, step=500, key="m2_d", on_change=clear_plan_states)
+    
+    st.write("② 合計時間")
+    ctm, cts = st.columns(2)
+    with ctm:
+        v_tm = st.number_input("分", min_value=0, max_value=120, value=20, step=1, key="m2_tm", on_change=clear_plan_states)
+    with cts:
+        v_ts = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m2_ts", on_change=clear_plan_states)
+    tmp_secs = (v_tm * 60) + v_ts
+    
+    v_dist = st.number_input("③ 距離 (m)", value=5000, step=500, key="m2_d", on_change=clear_plan_states)
     tmp_dist = v_dist
+    
     if tmp_dist > 0:
         tmp_ave = tmp_secs / (tmp_dist / 500)
-    with col2:
-        st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
+        
+    # ③のすぐ下に結果を表示（col2のブロックから外に出しました）
+    st.info(f"④ 計算されたAverage: **{int(tmp_ave // 60)}分{tmp_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
     # 時間固定系
