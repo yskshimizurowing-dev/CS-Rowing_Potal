@@ -26,19 +26,19 @@ mode_idx = menus.index(selected_menu)
 
 calc_dist, calc_secs, calc_ave = 0.0, 0.0, 0.0
 
-# すべての入力項目を「2列」で統一して高さを揃える
+# 左右のメインカラム
 c1, c2 = st.columns(2)
 
-# 距離専用：② 距離（メートル）と書いた直下に入力欄を配置して高さ合わせ
-def distance_input_simple(col, label_text, key):
+# --- 共通の入力パーツ関数 ---
+def distance_input_custom(col, label_num_text, key):
     with col:
-        st.write(label_text)
-        return float(st.number_input(label_text, value=2000, step=500, key=key, label_visibility="collapsed"))
+        st.write(label_num_text)
+        st.write("メートル")
+        return float(st.number_input("距離", value=2000, step=500, key=key, label_visibility="collapsed"))
 
-# 時間専用：[分, 秒]の2列構成
-def time_input_aligned(col, label, key_m, key_s):
+def time_input_custom(col, label_num_text, key_m, key_s):
     with col:
-        st.write(label)
+        st.write(label_num_text)
         cols = st.columns(2)
         m = cols[0].number_input("分", min_value=0, value=8, step=1, key=key_m)
         s = cols[1].number_input("秒", min_value=0, max_value=59, value=0, step=1, key=key_s)
@@ -46,29 +46,34 @@ def time_input_aligned(col, label, key_m, key_s):
 
 # ロジック分岐
 if mode_idx == 0:
-    calc_dist = distance_input_simple(c1, "② 距離（メートル）", "m0_d")
-    calc_secs = time_input_aligned(c2, "③ 目標タイム", "m0_m", "m0_s")
+    calc_dist = distance_input_custom(c1, "② 距離", "m0_d")
+    calc_secs = time_input_custom(c2, "③ 目標タイム", "m0_m", "m0_s")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 必要なAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
-    calc_dist = distance_input_simple(c1, "② 距離（メートル）", "m1_d")
-    calc_secs = time_input_aligned(c2, "③ 全体のAverage", "m1_am", "m1_as")
+    calc_dist = distance_input_custom(c1, "② 距離", "m1_d")
+    calc_secs = time_input_custom(c2, "③ 全体のAverage", "m1_am", "m1_as")
     calc_secs = calc_secs * (calc_dist / 500)
     st.info(f"④ 算出された合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
 
 elif mode_idx == 2:
-    calc_secs = time_input_aligned(c1, "② 合計時間", "m2_tm", "m2_ts")
-    calc_dist = distance_input_simple(c2, "③ 距離（メートル）", "m2_d")
+    calc_secs = time_input_custom(c1, "② 合計時間", "m2_tm", "m2_ts")
+    calc_dist = distance_input_custom(c2, "③ 距離", "m2_d")
     if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
     st.info(f"④ 計算されたAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
-    calc_secs = time_input_aligned(c1, "② 測定時間", "m3_tm", "m3_ts")
-    calc_ave = time_input_aligned(c2, "③ 目標Average", "m3_am", "m3_as")
+    calc_secs = time_input_custom(c1, "② 測定時間", "m3_tm", "m3_ts")
+    calc_ave = time_input_custom(c2, "③ 目標Average", "m3_am", "m3_as")
     if calc_ave > 0: calc_dist = (calc_secs / calc_ave) * 500
     st.info(f"④ 想定される合計目標距離: **{calc_dist:.1f} m**")
 
+# プラン作成・調整ロジック（以前のものと同一）
+st.markdown("---")
+if st.button("⑤ レースプランを作成", type="primary"):
+    st.session_state.update({"active_plan_flag": True, "fixed_ave_seconds": calc_ave, "fixed_distance_m": calc_dist, "fixed_total_seconds": calc_secs, "fixed_calc_mode": "time_base" if mode_idx >= 2 else "distance_base", "fixed_mode_idx": mode_idx})
+    st.rerun()
 # 以下、プラン作成・調整ロジック
 st.markdown("---")
 if st.button("⑤ レースプランを作成", type="primary"):
