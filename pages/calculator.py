@@ -1,11 +1,3 @@
-ご提示いただいた新しい流れ、素晴らしい設計ですね！
-
-「目標タイムから必要なAverageを出す」だけでなく、「出したいAverageから全体のタイムを逆算する」という両方のパターンに対応でき、さらに「ボタンを押して初めてQごとのプラン作成画面が開く」という形にすることで、画面がスッキリして非常に使いやすくなります。
-
-ご希望の挙動（①〜⑤のステップ）を完全に再現したコードを作成しました。pages/calculator.py を以下のコードに丸ごと差し替えてみてください。
-
-📄 修正版 pages/calculator.py
-Python
 import streamlit as st
 
 st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
