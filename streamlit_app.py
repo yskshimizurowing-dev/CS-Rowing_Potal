@@ -60,7 +60,8 @@ with col2:
     if st.button("📋\n\nホワイトボード", use_container_width=True):
         st.switch_page("./pages/whiteboard.py")
 with col3:    # 欠席連絡
-    st.link_button("📝\n\n欠席連絡", "https://docs.google.com/forms/d/e/1FAIpQLSdZWWNO0GpPOpadbspDl_YPgA_jx1Q2i4xUUdH44IinvhGY_w/viewform?usp=dialog", use_container_width=True)
+    if st.button("📝\n\n欠席連絡", use_container_width=True):
+        st.switch_page("https://docs.google.com/forms/d/e/1FAIpQLSdZWWNO0GpPOpadbspDl_YPgA_jx1Q2i4xUUdH44IinvhGY_w/viewform?usp=dialog")
 
 # 【2行目】
 col4, col5, col6 = st.columns(3)
