@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
 st.title("🛶 エルゴ・レースプランシミュレーター")
-st.write("カテゴリを選んで目標数値を入力し、レースプラン作成・シミュレーションします。")
+st.write("カテゴリを選んで目標数値を入力し、レースプランを作成・シミュレーションします。")
 st.markdown("---")
 
 # --- ① カテゴリーの選択 ---
@@ -38,90 +38,86 @@ calc_dist = 0.0
 calc_secs = 0.0
 calc_ave = 0.0
 
-# ====================================================================
-# ★メニュー2番（合計時間 と 距離 から…）の完全修正エリア
-# ====================================================================
-if mode_idx == 2:
-    current_type = "time_base"
-    
-    # 画面を綺麗に50:50で左右分割（これ以上の細かい列分割は絶対にしません）
-    main_col1, main_col2 = st.columns(2)
-    
+# 画面全体の左右2列分割（すべてのメニューで共通の安全な50:50枠を使用）
+main_col1, main_col2 = st.columns(2)
+
+# --- 各メニューの入力制御（入れ子カラムを完全排除） ---
+if mode_idx == 0:
+    current_type = "distance_base"
     with main_col1:
-        st.write("② 合計時間")
-        # 分と秒を縦に並べることで、バグの原因となる「横並びのための入れ子カラム」を完全排除
-        v_tm = st.number_input("時間（分）", min_value=0, max_value=120, value=20, step=1, key="m2_tm_final")
-        v_ts = st.number_input("時間（秒）", min_value=0, max_value=59, value=0, step=1, key="m2_ts_final")
-        calc_secs = (v_tm * 60) + v_ts
-        
+        st.write("② 距離")
+        v_dist = st.number_input("距離 (m)", min_value=0, value=2000, step=500, key="m0_d_f")
+        calc_dist = float(v_dist)
     with main_col2:
-        st.write("③ 距離")
-        # 入力欄の右側に「m」という文字を安全に埋め込む標準機能を使用
-        v_dist = st.number_input("目標距離", value=5000, step=500, key="m2_d_final", value_type="int")
-        # 分・秒の入力欄と高さを揃えるためのダミーのスペース
-        st.write(f"<span style='color:gray;'>単位: {v_dist} m</span>", unsafe_html=True)
-        calc_dist = v_dist
-        
+        st.write("③ 全体の目標タイム")
+        v_m = st.number_input("目標タイム（分）", min_value=0, max_value=60, value=8, step=1, key="m0_m_f")
+        v_s = st.number_input("目標タイム（秒）", min_value=0, max_value=59, value=0, step=1, key="m0_s_f")
+        calc_secs = float((v_m * 60) + v_s)
     if calc_dist > 0:
         calc_ave = calc_secs / (calc_dist / 500)
-
+    
     st.write("") 
-    # カラムブロックの完全に「外」に配置。これで絶対に右寄りが直り、真下にフルサイズで来ます
-    st.info(f"④ 計算されたAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
-
-# ====================================================================
-# その他のメニュー（干渉を防ぐため隔離）
-# ====================================================================
-elif mode_idx == 0:
-    current_type = "distance_base"
-    c1, c2 = st.columns(2)
-    with c1:
-        v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m0_d", on_change=clear_plan_states)
-    with c2:
-        st.write("③ 全体の目標タイム")
-        cm, cs = st.columns(2)
-        with cm: v_m = st.number_input("分", min_value=0, max_value=60, value=8, step=1, key="m0_m", on_change=clear_plan_states)
-        with cs: v_s = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m0_s", on_change=clear_plan_states)
-        calc_dist = v_dist
-        calc_secs = (v_m * 60) + v_s
-        if calc_dist > 0: calc_ave = calc_secs / (calc_dist / 500)
-        st.info(f"④ 必要な全体のAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
+    st.info(f"④ 必要な全体のAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 1:
     current_type = "distance_base"
-    c1, c2 = st.columns(2)
-    with c1:
-        v_dist = st.number_input("② 距離 (m)", value=2000, step=500, key="m1_d", on_change=clear_plan_states)
-    with c2:
+    with main_col1:
+        st.write("② 距離")
+        v_dist = st.number_input("距離 (m)", min_value=0, value=2000, step=500, key="m1_d_f")
+        calc_dist = float(v_dist)
+    with main_col2:
         st.write("③ 全体のAverage (/500m)")
-        cam, cas = st.columns(2)
-        with cam: v_am = st.number_input("分 ", min_value=0, max_value=10, value=2, step=1, key="m1_am", on_change=clear_plan_states)
-        with cas: v_as = st.number_input("秒 ", min_value=0, max_value=59, value=0, step=1, key="m1_as", on_change=clear_plan_states)
-        calc_dist = v_dist
-        calc_ave = (v_am * 60) + v_as
-        if calc_dist > 0: calc_secs = calc_ave * (calc_dist / 500)
-        st.info(f"④ 算出された合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
+        v_am = st.number_input("Average（分）", min_value=0, max_value=10, value=2, step=1, key="m1_am_f")
+        v_as = st.number_input("Average（秒）", min_value=0, max_value=59, value=0, step=1, key="m1_as_f")
+        calc_ave = float((v_am * 60) + v_as)
+    if calc_dist > 0:
+        calc_secs = calc_ave * (calc_dist / 500)
+        
+    st.write("") 
+    st.info(f"④ 算出された合計タイム: **{int(calc_secs // 60)}分{calc_secs % 60:04.1f}秒**")
+
+elif mode_idx == 2:
+    # エラー原因（value_type）を完全除去した時間測定モード
+    current_type = "time_base"
+    with main_col1:
+        st.write("② 合計時間")
+        v_tm = st.number_input("合計時間（分）", min_value=0, max_value=120, value=20, step=1, key="m2_tm_f")
+        v_ts = st.number_input("合計時間（秒）", min_value=0, max_value=59, value=0, step=1, key="m2_ts_f")
+        calc_secs = float((v_tm * 60) + v_ts)
+    with main_col2:
+        st.write("③ 距離")
+        v_dist = st.number_input("目標距離 (m)", min_value=0, value=5000, step=500, key="m2_d_f")
+        calc_dist = float(v_dist)
+    if calc_dist > 0:
+        calc_ave = calc_secs / (calc_dist / 500)
+        
+    st.write("") 
+    st.info(f"④ 計算されたAverage: **{int(calc_ave // 60)}分{calc_ave % 60:04.1f}秒** / 500m")
 
 elif mode_idx == 3:
     current_type = "time_base"
-    c1, c2 = st.columns(2)
-    with c1:
+    with main_col1:
         st.write("② 合計の測定時間")
-        ctm, cts = st.columns(2)
-        with ctm: v_tm = st.number_input("分", min_value=0, max_value=120, value=20, step=1, key="m3_tm", on_change=clear_plan_states)
-        with cts: v_ts = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, key="m3_ts", on_change=clear_plan_states)
-        calc_secs = (v_tm * 60) + v_ts
-    with c2:
+        v_tm = st.number_input("測定時間（分）", min_value=0, max_value=120, value=20, step=1, key="m3_tm_f")
+        v_ts = st.number_input("測定時間（秒）", min_value=0, max_value=59, value=0, step=1, key="m3_ts_f")
+        calc_secs = float((v_tm * 60) + v_ts)
+    with main_col2:
         st.write("③ 目標のAverage (/500m)")
-        cam, cas = st.columns(2)
-        with cam: v_am = st.number_input("分  ", min_value=0, max_value=10, value=1, step=1, key="m3_am", on_change=clear_plan_states)
-        with cas: v_as = st.number_input("秒  ", min_value=0, max_value=59, value=50, step=1, key="m3_as", on_change=clear_plan_states)
-        calc_ave = (v_am * 60) + v_as
-        if calc_ave > 0: calc_dist = (calc_secs / calc_ave) * 500
-        st.info(f"④ 想定される合計の目標距離: **{calc_dist:.1f} m**")
+        v_am = st.number_input("目標Average（分）", min_value=0, max_value=10, value=1, step=1, key="m3_am_f")
+        v_as = st.number_input("目標Average（秒）", min_value=0, max_value=59, value=50, step=1, key="m3_as_f")
+        calc_ave = float((v_am * 60) + v_as)
+    if calc_ave > 0:
+        calc_dist = (calc_secs / calc_ave) * 500
+        
+    st.write("") 
+    st.info(f"④ 想定される合計の目標距離: **{calc_dist:.1f} m**")
 
 
 # --- ⑤ レースプランを作成 ボタン ---
+if f"q1_offset_sec" not in st.session_state:
+    for i in range(1, 5):
+        st.session_state[f"q{i}_offset_sec"] = 0.0
+
 if not st.session_state["active_plan_flag"]:
     st.session_state["fixed_ave_seconds"] = calc_ave
     st.session_state["fixed_distance_m"] = calc_dist
