@@ -168,24 +168,29 @@ if st.session_state["active_plan_flag"]:
 
     st.write("")
     
-    # 最終合計を計算するための作業用変数
     calculated_total_seconds = 0.0
     calculated_total_distance = 0.0
 
-    # 横一列のヘッダーを表示（PCやブラウザ幅で見やすいように）
-    hc1, hc2, hc3, hc4, hc5 = st.columns([1, 2, 1.5, 2.5, 2.5])
-    with hc1: st.caption("🔲 Q")
-    with hc2: st.caption("🏃 500m Ave")
-    with hc3: st.caption("➕ ➖")
-    with hc4: st.caption("⏱️ Qタイム")
-    with hc5: st.caption("📏 Q距離")
+    # 動的なヘッダー設定（不要な列は作らない）
+    if calc_mode == "distance_base":
+        hc1, hc2, hc3, hc4 = st.columns([1, 2, 2, 3])
+        with hc1: st.caption("🔲 Q")
+        with hc2: st.caption("🏃 500m Ave")
+        with hc3: st.caption("➕ ➖")
+        with hc4: st.caption("⏱️ Qタイム")
+    else:
+        hc1, hc2, hc3, hc4 = st.columns([1, 2, 2, 3])
+        with hc1: st.caption("🔲 Q")
+        with hc2: st.caption("🏃 500m Ave")
+        with hc3: st.caption("➕ ➖")
+        with hc4: st.caption("📏 Q距離")
+        
     st.markdown("---")
 
     # 1Q〜4Qのループ処理
     for i in range(1, 5):
-        c_q, c_ave, c_btn, c_time, c_dist = st.columns([1, 2, 1.5, 2.5, 2.5])
+        c_q, c_ave, c_btn, c_val = st.columns([1, 2, 2, 3])
         
-        # 現在のQのAverage(500m)の秒数を算出
         final_q_sec = base_ave + st.session_state[f"q{i}_offset_sec"]
         if final_q_sec < 0:
             final_q_sec = 0.0
@@ -193,29 +198,20 @@ if st.session_state["active_plan_flag"]:
         q_m = int(final_q_sec // 60)
         q_s = final_q_sec % 60
 
-        # 各Qにかかる時間・距離の計算
+        # 計算処理と不要データの非表示化
         if calc_mode == "distance_base":
-            # 距離測定系：1Qあたりの距離は「全体の総距離 ÷ 4」で固定
             this_q_dist = dist_total / 4
-            # タイム ＝ 500m Ave × (Q距離 / 500)
             this_q_secs = final_q_sec * (this_q_dist / 500)
         else:
-            # 時間測定系：1Qあたりの時間は「全体の総秒数 ÷ 4」で固定
             this_q_secs = secs_total / 4
-            # 距離 ＝ (Q秒数 / 500m Ave) * 500
             if final_q_sec > 0:
                 this_q_dist = (this_q_secs / final_q_sec) * 500
             else:
                 this_q_dist = 0.0
 
-        # 合計用に加算していく
         calculated_total_seconds += this_q_secs
         calculated_total_distance += this_q_dist
 
-        this_q_m = int(this_q_secs // 60)
-        this_q_s = this_q_secs % 60
-
-        # 画面への1列配置
         with c_q:
             st.write(f"**{i}Q**")
             
@@ -223,7 +219,6 @@ if st.session_state["active_plan_flag"]:
             st.write(f"**{q_m:02d}:{q_s:04.1f}**")
             
         with c_btn:
-            # 省スペースのボタングループ
             b1, b2 = st.columns(2)
             with b1:
                 if st.button("➕", key=f"p_btn_{i}"):
@@ -234,28 +229,32 @@ if st.session_state["active_plan_flag"]:
                     st.session_state[f"q{i}_offset_sec"] -= 0.5
                     st.rerun()
                     
-        with c_time:
-            st.write(f"`{this_q_m:02d}:{this_q_s:04.1f}`")
-            
-        with c_dist:
-            st.write(f"`{this_q_dist:.1f} m`")
+        with c_val:
+            if calc_mode == "distance_base":
+                this_q_m = int(this_q_secs // 60)
+                this_q_s = this_q_secs % 60
+                st.write(f"`{this_q_m:02d}:{this_q_s:04.1f}`")
+            else:
+                st.write(f"`{this_q_dist:.1f} m`")
 
     st.markdown("---")
 
-    # --- 最終結果表示エリア（ユーザー様のご要望レイアウト） ---
+    # --- ⑦ 最終結果表示エリア ---
     st.markdown("### **現在の合計**")
     
-    total_m = int(calculated_total_seconds // 60)
-    total_s = calculated_total_seconds % 60
-    
-    # タイムと距離を横並びで大きく表示
-    res_col1, res_col2 = st.columns(2)
-    with res_col1:
-        st.metric(label="⏱️ 合計タイム", value=f"{total_m}分 {total_s:04.1f}秒")
-    with res_col2:
-        st.metric(label="📏 合計距離", value=f"{calculated_total_distance:.1f} m")
+    # 全体の最終的な合計Averageを算出する
+    if calculated_total_distance > 0:
+        final_total_ave = calculated_total_seconds / (calculated_total_distance / 500)
+    else:
+        final_total_ave = 0.0
+        
+    final_ave_m = int(final_total_ave // 60)
+    final_ave_s = final_total_ave % 60
 
-    # フィードバックメッセージ
+    # ご要望通り「合計Average」を最優先でドンと大きく表示
+    st.metric(label="🏃 プラン合計 Average (/500m)", value=f"{final_ave_m:02d}:{final_ave_s:04.1f}")
+
+    # 目標値との比較フィードバック
     if calc_mode == "distance_base":
         diff_secs = calculated_total_seconds - secs_total
         if abs(diff_secs) < 0.01:
