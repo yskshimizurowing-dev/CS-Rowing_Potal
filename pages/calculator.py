@@ -1,11 +1,12 @@
 import streamlit as st
 
-st.set_page_config(page_title="Race Planner", layout="centered")
+st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
-st.title("🛶 Ergo Race Plan Simulator")
-st.write("Select category, input values, and generate your race plan.")
+st.title("🛶 エルゴ・レースプランシミュレーター")
+st.write("カテゴリを選んで目標数値を入力し、レースプランを作成・シミュレーションします。")
 st.markdown("---")
 
+# --- 値の変更を検知して状態をリセットする関数 ---
 def reset_all_states():
     for i in range(1, 5):
         st.session_state[f"calc_q{i}_diff"] = 0.0
@@ -17,41 +18,41 @@ for i in range(1, 5):
     if f"calc_q{i}_diff" not in st.session_state:
         st.session_state[f"calc_q{i}_diff"] = 0.0
 
-# --- ① 計算したいカテゴリーを選択（時間固定パターンを追加） ---
+# --- ① 計算したいカテゴリーを選択 ---
 category = st.selectbox(
-    "1. Select Category",
+    "① 計算したいカテゴリーを選択してください",
     [
-        "Distance & Target Time -> Calculate Average", 
-        "Distance & Average -> Calculate Target Time",
-        "Total Time & Average -> Calculate Target Distance (e.g., 20min Test)"
+        "距離 と 目標タイム から【全体のAverage】を出す", 
+        "距離 と Average から【目標タイム】を出す",
+        "合計時間 と Average から【目標距離】を出す（例：20分測定など）"
     ],
     on_change=reset_all_states
 )
 
-st.markdown("### **Input Area**")
+st.markdown("### **入力エリア**")
 col1, col2 = st.columns(2)
 
 # 変数の初期化
 distance = 0.0
 target_total_seconds = 0.0
 base_ave_seconds = 0.0
-is_time_based = "Total Time" in category  # 時間固定メニューかどうかのフラグ
+is_time_based = "合計時間" in category
 
 if not is_time_based:
     # ==========================================
-    # 従来の「距離ベース」の入力処理
+    # 距離ベースの入力処理
     # ==========================================
     with col1:
-        distance = st.number_input("2. Distance (m)", value=2000, step=500, on_change=reset_all_states)
+        distance = st.number_input("② 距離 (m)", value=2000, step=500, on_change=reset_all_states)
 
     with col2:
-        if "Target Time" in category:
-            st.write("3. Target Total Time")
+        if "目標タイム" in category:
+            st.write("③ 全体の目標タイム")
             col_m, col_s = st.columns(2)
             with col_m:
-                target_min = st.number_input("Min", min_value=0, max_value=60, value=8, step=1, on_change=reset_all_states)
+                target_min = st.number_input("分", min_value=0, max_value=60, value=8, step=1, on_change=reset_all_states)
             with col_s:
-                target_sec = st.number_input("Sec", min_value=0, max_value=59, value=0, step=1, on_change=reset_all_states)
+                target_sec = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, on_change=reset_all_states)
             
             target_total_seconds = (target_min * 60) + target_sec
             if distance > 0:
@@ -59,15 +60,15 @@ if not is_time_based:
             
             ave_m = int(base_ave_seconds // 60)
             ave_s = base_ave_seconds % 60
-            st.info(f"4. Required Average: **{ave_m}m {ave_s:04.1f}s** / 500m")
+            st.info(f"④ 必要な全体のAverage: **{ave_m}分{ave_s:04.1f}秒** / 500m")
 
         else:
-            st.write("3. Overall Average (/500m)")
+            st.write("③ 全体のAverage (/500m)")
             col_am, col_as = st.columns(2)
             with col_am:
-                ave_min = st.number_input("Min ", min_value=0, max_value=10, value=2, step=1, on_change=reset_all_states)
+                ave_min = st.number_input("分 ", min_value=0, max_value=10, value=2, step=1, on_change=reset_all_states)
             with col_as:
-                ave_sec = st.number_input("Sec ", min_value=0, max_value=59, value=0, step=1, on_change=reset_all_states)
+                ave_sec = st.number_input("秒 ", min_value=0, max_value=59, value=0, step=1, on_change=reset_all_states)
             
             base_ave_seconds = (ave_min * 60) + ave_sec
             if distance > 0:
@@ -75,11 +76,82 @@ if not is_time_based:
             
             total_m = int(target_total_seconds // 60)
             total_s = target_total_seconds % 60
-            st.info(f"4. Calculated Total Time: **{total_m}m {total_s:04.1f}s**")
+            st.info(f"④ 算出された合計タイム: **{total_m}分{total_s:04.1f}秒**")
 
 else:
     # ==========================================
-    # 新設：「時間固定（20分測定など）」の入力処理
+    # 時間ベース（20分測定など）の入力処理
     # ==========================================
     with col1:
-        st.write("2. Total Test Time")
+        st.write("② 合計の測定時間")
+        col_tm, col_ts = st.columns(2)
+        with col_tm:
+            target_min = st.number_input("分", min_value=0, max_value=120, value=20, step=1, on_change=reset_all_states)
+        with col_ts:
+            target_sec = st.number_input("秒", min_value=0, max_value=59, value=0, step=1, on_change=reset_all_states)
+        target_total_seconds = (target_min * 60) + target_sec
+
+    with col2:
+        st.write("③ 目標のAverage (/500m)")
+        col_am, col_as = st.columns(2)
+        with col_am:
+            ave_min = st.number_input("分  ", min_value=0, max_value=10, value=1, step=1, on_change=reset_all_states)
+        with col_as:
+            ave_sec = st.number_input("秒  ", min_value=0, max_value=59, value=50, step=1, on_change=reset_all_states)
+        
+        base_ave_seconds = (ave_min * 60) + ave_sec
+        if base_ave_seconds > 0:
+            distance = (target_total_seconds / base_ave_seconds) * 500
+        
+        st.info(f"④ 想定される合計の目標距離: **{distance:.1f} m**")
+
+st.markdown("---")
+
+# --- ⑤ レースプランを作成 ボタン ---
+if st.button("⑤ レースプランを作成", type="primary"):
+    st.session_state["plan_generated"] = True
+
+if st.session_state["plan_generated"]:
+    if is_time_based:
+        q_info = f"各Qの長さ（時間固定）: {int((target_total_seconds/4)//60)}分 {int((target_total_seconds/4)%60)}秒"
+    else:
+        q_info = f"各Qの長さ（距離固定）: {distance/4:.0f}m"
+        
+    st.subheader(f"⏱️ 各Qの調整 (500m Average)")
+    st.caption(f"💡 {q_info}")
+    
+    if st.button("このプランをリセット", type="secondary"):
+        for i in range(1, 5):
+            st.session_state[f"calc_q{i}_diff"] = 0.0
+        st.rerun()
+
+    st.write("")
+    q_times = []
+
+    for i in range(1, 5):
+        c_name, c_plus, c_minus, c_result = st.columns([2, 1, 1, 3])
+        
+        with c_name:
+            st.markdown(f"### **{i}Q**")
+            
+        with c_plus:
+            if st.button("➕", key=f"calc_btn_p_{i}"):
+                st.session_state[f"calc_q{i}_diff"] += 0.5
+                st.rerun()
+                
+        with c_minus:
+            if st.button("➖", key=f"calc_btn_m_{i}"):
+                st.session_state[f"calc_q{i}_diff"] -= 0.5
+                st.rerun()
+                
+        q_seconds = base_ave_seconds + st.session_state[f"calc_q{i}_diff"]
+        if q_seconds < 0:
+            q_seconds = 0.0
+        q_times.append(q_seconds)
+        
+        with c_result:
+            q_m = int(q_seconds // 60)
+            q_s = q_seconds % 60
+            st.markdown(f"### `{q_m:02d}:{q_s:04.1f}`")
+
+    st.markdown("---")
