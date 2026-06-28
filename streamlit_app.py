@@ -1,7 +1,7 @@
 import streamlit as st
 
 # --- 1. 設定・定義 ---
-SECRET_TOKEN = "your_secret_key_2026"
+SECRET_TOKEN = st.secrets["GAS_TOKEN"]
 
 # ボタンの設定リスト
 BUTTONS = [
