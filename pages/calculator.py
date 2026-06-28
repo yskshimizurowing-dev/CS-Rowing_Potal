@@ -23,11 +23,11 @@ default_index = st.session_state.get("fixed_mode_idx", 0) if st.session_state["a
 selected_menu = st.selectbox("① カテゴリー選択", menus, index=default_index, on_change=clear_plan_states)
 mode_idx = menus.index(selected_menu)
 
-# --- 入力パーツ ---
+# --- 入力 ---
 c1, c2 = st.columns(2)
 if mode_idx in [0, 1]:
     dist = c1.number_input("② 距離 (m)", value=2000, step=500)
-    m = c2.number_input("③ 分", value=8)
+    m = c2.number_input("③ 分", value=2)
     s = c2.number_input("秒", value=0)
     calc_secs = m * 60 + s
     calc_ave = calc_secs / (dist / 500) if mode_idx == 0 and dist > 0 else calc_secs
@@ -38,7 +38,6 @@ else:
     calc_secs = m * 60 + s
     calc_ave = calc_secs / (dist / 500) if mode_idx == 2 and dist > 0 else 0
 
-# --- プラン作成ボタン ---
 if st.button("⑤ レースプランを作成", type="primary"):
     st.session_state.update({
         "active_plan_flag": True, "fixed_ave_seconds": calc_ave, 
@@ -65,27 +64,28 @@ if st.session_state["active_plan_flag"]:
         if f"q{i}_offset_sec" not in st.session_state: st.session_state[f"q{i}_offset_sec"] = 0.0
         q_sec = base_ave + st.session_state[f"q{i}_offset_sec"]
         
-        # 1行で表示し、スマホでのスクロールを抑制
-        st.write(f"**{i}Q** Ave:{int(q_sec//60)}:{q_sec%60:04.1f}")
+        # Ave横に結果を配置。秒数は常に2桁表示(:05.2f)
+        if calc_mode == 'distance_base':
+            ts = q_sec * ((dist_total / 4) / 500); p_total_secs += ts
+            res_display = f"{int(ts//60)}:{ts%60:05.2f}"
+        else:
+            td = (secs_total / 4 / q_sec) * 500 if q_sec > 0 else 0; p_total_dist += td
+            res_display = f"{td:.1f} m"
+            
+        st.write(f"**{i}Q** Ave {int(q_sec//60)}:{q_sec%60:05.2f} | {res_display}")
+        
         b1, b2 = st.columns(2)
         if b1.button("➕", key=f"p_{i}"): st.session_state[f"q{i}_offset_sec"] += 0.5; st.rerun()
         if b2.button("➖", key=f"m_{i}"): st.session_state[f"q{i}_offset_sec"] -= 0.5; st.rerun()
-        
-        if calc_mode == 'distance_base':
-            ts = q_sec * ((dist_total / 4) / 500); p_total_secs += ts
-            st.write(f"➔ タイム: `{int(ts//60):02d}:{ts%60:04.1f}`")
-        else:
-            td = (secs_total / 4 / q_sec) * 500 if q_sec > 0 else 0; p_total_dist += td
-            st.write(f"➔ 距離: `{td:.1f} m`")
         st.markdown("---")
 
-    # --- 判定結果 ---
+    # --- 判定 ---
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
-        st.write(f"合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:.1f}")
+        st.write(f"合計タイム: {int(p_total_secs//60)}:{p_total_secs%60:05.2f}")
         if abs(diff) < 0.1: st.success("設定と一致")
-        elif diff > 0: st.error(f"⚠️ {diff:.1f} 秒超過")
-        else: st.info(f"💡 {abs(diff):.1f} 秒猶予")
+        elif diff > 0: st.error(f"⚠️ {diff:.2f} 秒超過")
+        else: st.info(f"💡 {abs(diff):.2f} 秒猶予")
     else:
         diff = p_total_dist - dist_total
         st.write(f"合計距離: {p_total_dist:.1f} m")
