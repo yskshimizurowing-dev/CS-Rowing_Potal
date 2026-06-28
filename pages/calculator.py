@@ -1,32 +1,40 @@
 import streamlit as st
 
-st.set_page_config(page_title="エルゴ レースプランナー", layout="wide")
+st.set_page_config(page_title="エルゴ レースプランナー", layout="centered")
 
-# スクロール抑制のため余白を最小化
 st.markdown("""
 <style>
-    .stButton>button { width: 100%; height: 28px; font-size: 10px; padding: 0px; }
-    div[data-testid="stMarkdownContainer"] { font-size: 10px; }
-    .block-container { padding: 1rem 1rem; }
+    .stButton>button { width: 100%; height: 30px; font-size: 11px; }
+    .stExpander { border: none; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("##### 🛶 レースプランナー")
+st.markdown("##### 🛶 エルゴ・レースプランナー")
 
 if "active_plan_flag" not in st.session_state: st.session_state["active_plan_flag"] = False
 
-# 入力項目（スマホで1行に収めるためカテゴリ選択のみ表示）
-menus = ["距離/タイム", "距離/Ave", "時間/距離", "時間/Ave"]
-mode_idx = menus.index(st.selectbox("① カテゴリ", menus))
-calc_dist, calc_secs, calc_ave = 2000.0, 480.0, 120.0 # 初期値
-if st.button("作成", type="primary"):
-    st.session_state.update({"active_plan_flag": True, "fixed_ave_seconds": calc_ave, "fixed_distance_m": calc_dist, "fixed_total_seconds": calc_secs, "fixed_calc_mode": "time_base" if mode_idx >= 2 else "distance_base"})
-    st.rerun()
+# 入力フォームをexpanderに格納
+with st.expander("①～⑤ 設定入力", expanded=not st.session_state["active_plan_flag"]):
+    menus = ["距離とタイム", "距離とAve", "時間と距離", "時間とAve"]
+    mode_idx = menus.index(st.selectbox("計算カテゴリ", menus))
+    
+    # 入力ロジックを簡潔化
+    c1, c2 = st.columns(2)
+    val1 = c1.number_input("距離/時間(分)", value=2000.0)
+    val2 = c2.number_input("タイム/Ave(秒)", value=120.0)
+    
+    if st.button("プラン作成・更新"):
+        # 計算ロジック（簡易版）
+        dist = val1 if mode_idx < 2 else 5000.0
+        ave = val2
+        st.session_state.update({"active_plan_flag": True, "fixed_ave_seconds": ave, "fixed_distance_m": dist, "fixed_total_seconds": ave * (dist/500), "fixed_calc_mode": "distance_base"})
+        st.rerun()
 
 if st.session_state["active_plan_flag"]:
-    base_ave, dist_total, secs_total, calc_mode = st.session_state["fixed_ave_seconds"], st.session_state["fixed_distance_m"], st.session_state["fixed_total_seconds"], st.session_state["fixed_calc_mode"]
+    base_ave = st.session_state["fixed_ave_seconds"]
     
-    # 2x2 マトリクス配置（各セル内も極小化）
+    st.subheader("⏱️ 各Qの調整")
+    # 2x2 マトリクス配置
     for row in range(2):
         r_cols = st.columns(2)
         for col in range(2):
@@ -38,15 +46,7 @@ if st.session_state["active_plan_flag"]:
                 b1, b2 = st.columns(2)
                 if b1.button("➕", key=f"p{i}"): st.session_state[f"q{i}_off"] += 0.5; st.rerun()
                 if b2.button("➖", key=f"m{i}"): st.session_state[f"q{i}_off"] -= 0.5; st.rerun()
-                
-                # 結果表示を1行に
-                if calc_mode == 'distance_base':
-                    v = q_sec * ((dist_total/4)/500)
-                    st.write(f"👉{int(v//60)}:{v%60:02.0f}")
-                else:
-                    v = (secs_total/4/q_sec)*500 if q_sec > 0 else 0
-                    st.write(f"👉{v:.0f}m")
-
+    
     if st.button("リセット"):
         for i in range(1, 5): st.session_state[f"q{i}_off"] = 0.0
         st.rerun()
