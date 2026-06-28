@@ -5,9 +5,9 @@ SECRET_TOKEN = st.secrets["GAS_TOKEN"]
 
 # ボタンの設定リスト
 BUTTONS = [
-    {"label": "🏋️\n\nトレーニング", "url": "https://script.google.com/macros/s/AKfycbzWNeZKPqD-V4FWsZP-90kpEP7M48O7XeUqw_DNPu1kIBvAvJMmP2A0QZ9UQW0r3yxf8w/exec", "type": "gas"},
+    {"label": "🏋️\n\nトレーニング", "key": "URL_TRAINING", "type": "gas"},
     {"label": "📋\n\nホワイトボード", "url": "pages/whiteboard.py", "type": "page"},
-    {"label": "📝\n\n欠席連絡", "url": "https://forms.gle/BRUbZgVGwcyvKd7v6", "type": "link"},
+    {"label": "📝\n\n欠席連絡", "key": "URL_FORM", "type": "link"},
     {"label": "🚣\n\n測定記録DB", "url": "https://script.google.com/macros/s/YYYY/exec", "type": "gas"},
     {"label": "🧮\n\nAverage計算", "url": "pages/calculator.py", "type": "page"},
     {"label": "🔧\n\nリギング", "url": "https://script.google.com/macros/s/ZZZZ/exec", "type": "gas"},
