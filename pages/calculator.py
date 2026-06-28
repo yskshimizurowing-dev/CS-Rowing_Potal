@@ -102,12 +102,12 @@ if st.session_state["active_plan_flag"]:
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
         st.write(f"合計タイム: {int(p_total_secs//60)}分{p_total_secs%60:.1f}秒")
-        if abs(diff) < 0.1: st.success("🎉 目標とピッタリです！")
-        elif diff > 0: st.error(f"⚠️ 目標より {diff:.1f} 秒遅いです")
-        else: st.info(f"💡 目標より {abs(diff):.1f} 秒速いです")
+        if abs(diff) < 0.1: st.success("設定タイムと一致")
+        elif diff > 0: st.error(f"⚠️ 設定タイムに対し {diff:.1f} 秒超過")
+        else: st.info(f"💡 設定タイムに対し {abs(diff):.1f} 秒猶予")
     else:
         diff = p_total_dist - dist_total
         st.write(f"合計距離: {p_total_dist:.1f} m")
-        if abs(diff) < 0.5: st.success("🎉 目標とピッタリです！")
-        elif diff > 0: st.success(f"🚀 目標より {diff:.1f} m 多いです")
-        else: st.error(f"⚠️ 目標より {abs(diff):.1f} m 不足しています")
+        if abs(diff) < 0.5: st.success("設定距離と一致")
+        elif diff > 0: st.success(f"💡 設定距離に対し {diff:.1f} m 超過")
+        else: st.error(f"⚠️ 設定距離に対し {abs(diff):.1f} m 不足")
