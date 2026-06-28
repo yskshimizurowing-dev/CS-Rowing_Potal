@@ -77,38 +77,43 @@ if st.button("⑤ レースプランを作成", type="primary"):
     st.rerun()
 
 if st.session_state["active_plan_flag"]:
-    base_ave, dist_total, secs_total, calc_mode = st.session_state["fixed_ave_seconds"], st.session_state["fixed_distance_m"], st.session_state["fixed_total_seconds"], st.session_state["fixed_calc_mode"]
-    st.subheader("各Qの調整")
+    base_ave = st.session_state["fixed_ave_seconds"]
+    dist_total = st.session_state["fixed_distance_m"]
+    secs_total = st.session_state["fixed_total_seconds"]
+    calc_mode = st.session_state["fixed_calc_mode"]
+
+    st.subheader("⏱️ 各Qの調整")
     if st.button("このプランをリセット"):
         for i in range(1, 5): st.session_state[f"q{i}_offset_sec"] = 0.0
         st.rerun()
 
-    p_total_secs, p_total_dist = 0.0, 0.0
+    # モバイルで改行されにくい比率 [1.5, 3, 3, 3] に調整
     for i in range(1, 5):
-        # 画面描画用に値を安全に取得（なければ0.0）
-        current_offset = st.session_state.get(f"q{i}_offset_sec", 0.0)
+        c1, c2, c3, c4 = st.columns([1.5, 3, 3, 3])
         
-        c1, c2, c3, c4 = st.columns([1, 2, 2, 3])
+        # 1. Q表示
         c1.write(f"**{i}Q**")
-        q_sec = base_ave + current_offset
-        c2.write(f"**{int(q_sec//60):02d}:{q_sec%60:04.1f}**")
         
-        b1, b2 = c3.columns(2)
+        # 2. Ave表示
+        q_sec = base_ave + st.session_state.get(f"q{i}_offset_sec", 0.0)
+        c2.write(f"**{int(q_sec//60)}:{q_sec%60:04.1f}**")
         
-        # 修正ポイント: 直接 += を使わず、明示的に代入する
-        if b1.button("➕", key=f"p_{i}"): 
+        # 3. +-ボタン（コンパクトに配置）
+        btn_cols = c3.columns(2)
+        if btn_cols[0].button("➕", key=f"p_{i}"): 
             st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) + 0.5
             st.rerun()
-            
-        if b2.button("➖", key=f"m_{i}"): 
+        if btn_cols[1].button("➖", key=f"m_{i}"): 
             st.session_state[f"q{i}_offset_sec"] = st.session_state.get(f"q{i}_offset_sec", 0.0) - 0.5
             st.rerun()
+        
+        # 4. 結果表示
         if calc_mode == 'distance_base':
-            ts = q_sec * ((dist_total / 4) / 500); p_total_secs += ts
-            c4.write(f"`{int(ts//60):02d}:{ts%60:04.1f}`")
+            ts = q_sec * ((dist_total / 4) / 500)
+            c4.write(f"`{int(ts//60)}:{ts%60:04.1f}`")
         else:
-            td = (secs_total / 4 / q_sec) * 500 if q_sec > 0 else 0; p_total_dist += td
-            c4.write(f"`{td:.1f} m`")
+            td = (secs_total / 4 / q_sec) * 500 if q_sec > 0 else 0
+            c4.write(f"`{td:.1f}m`")
     st.markdown("---")
     if calc_mode == 'distance_base':
         diff = p_total_secs - secs_total
