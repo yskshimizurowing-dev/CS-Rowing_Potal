@@ -26,8 +26,13 @@ if st.user is not None:
             if i + j < len(visible_items):
                 item = visible_items[i + j]
                 with col:
+                    # URLを取得
                     url = get_url(item)
-                    st.markdown(f'''
+    
+                    # リンクとして機能させつつ、画像を表示
+                    st.markdown(f'<a href="{url}" target="_blank">', unsafe_allow_html=True)
+                    st.image(item["icon"], use_container_width=True) # ★ここを修正
+                    st.markdown('</a>', unsafe_allow_html=True)
                         <div class="menu-container">
                             <a href="{url}" target="_blank"><img src="{item["icon"]}" class="menu-img"></a>
                         </div>
