@@ -8,20 +8,21 @@ st.title("🚣 ボート部専用ポータル")
 
 visible_items = [item for item in MENU_ITEMS if item.get("visible", True)]
 
-# 3列で表示（PC/スマホのレイアウト崩れ対策として、最も標準的な方法）
 cols = st.columns(3)
 
 if st.user is not None:
     for idx, item in enumerate(visible_items):
         with cols[idx % 3]:
-            # 画像パスを直接指定
             icon_path = item.get("icon", "")
             
-            # 画像表示
+            # 画像を表示（見つからない場合はスキップしてアプリを落とさない）
             if icon_path:
-                st.image(icon_path, use_container_width=True)
+                try:
+                    st.image(icon_path, use_container_width=True)
+                except:
+                    st.write("🖼️ (画像エラー)")
             
-            # ボタン
+            # ボタン/リンク表示
             url = get_url(item)
             if item["type"] == "page":
                 if st.button(item["label"], key=f"btn_{idx}", use_container_width=True):
