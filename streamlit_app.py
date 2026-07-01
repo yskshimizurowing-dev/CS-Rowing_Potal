@@ -6,7 +6,7 @@ import os
 
 st.set_page_config(layout="centered")
 
-st.title("🚣 ボート部専用ポータル")
+st.title("中杉ボート部<br>専用ポータル")
 
 visible_items = [item for item in MENU_ITEMS if item.get("visible", True)]
 
