@@ -5,7 +5,7 @@ SECRET_TOKEN = st.secrets["GAS_TOKEN"]
 
 MENU_ITEMS = [
     {"label": "トレーニング\nメニュー", "key": "URL_TRAINING", "type": "gas", "icon": "assets/training.png", "visible": True},
-    {"label": "乗艇練習\nホワイトボード", "url": "pages/whiteboard.py", "type": "page", "icon": "assets/whiteboard.png", "visible": True},
+    {"label": "乗艇練習\nホワイトボード", "key": "URL_WHITEBOARD", "type": "gas", "icon": "assets/whiteboard.png", "visible": True},
     {"label": "予定表", "url": "pages/schedule.py", "type": "page", "icon": "assets/schedule.png", "visible": True},
     {"label": "欠席連絡\nフォーム", "key": "URL_FORM", "type": "link", "icon": "assets/form.png", "visible": True},
     {"label": "Average\n計算ツール", "url": "pages/calculator.py", "type": "page", "icon": "assets/calculator.png", "visible": True},
