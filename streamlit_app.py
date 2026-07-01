@@ -4,11 +4,11 @@ from utils import get_url
 
 st.set_page_config(page_title="ボート部専用ポータル", layout="centered")
 
-# スタイルを調整して画像をボタンの上にピッタリ配置する
+# CSS: 画像のサイズを制限し、マウスオーバーでポインタを表示する
 st.markdown("""
     <style>
-    .stImage { margin-bottom: 0px !important; }
-    div.stButton > button { width: 100%; }
+    .menu-img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin-bottom: 5px; }
+    .item-container { text-align: center; margin-bottom: 20px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -25,13 +25,16 @@ if st.user is not None:
                 with col:
                     url = get_url(item)
                     
-                    # 画像を表示（ボタンの幅に合わせる）
+                    # 画像をクリック可能なリンクにする
+                    st.markdown(f'<div class="item-container"><a href="{url}" target="_blank">', unsafe_allow_html=True)
                     try:
-                        st.image(item["icon"], use_container_width=True)
+                        # 画像サイズをCSSのクラスで制限
+                        st.image(item["icon"], width=100) 
                     except:
-                        st.write(" ")
+                        st.write("画像なし")
+                    st.markdown('</a>', unsafe_allow_html=True)
                     
-                    # ボタンまたはリンクの描画
+                    # ボタンでリンク遷移
                     if item["type"] == "page":
                         if st.button(item["label"], key=f"btn_{i+j}"):
                             st.switch_page(item["url"])
