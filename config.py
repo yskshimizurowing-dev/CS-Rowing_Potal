@@ -11,7 +11,7 @@ MENU_ITEMS = [
     {"label": "Average\n計算ツール", "url": "pages/calculator.py", "type": "page", "icon": "assets/calculator.png", "visible": True},
     {"label": "エルゴ測定記録\nデータベース", "key": "URL_DB", "type": "gas", "icon": "assets/db.png", "visible": True},
     {"label": "リギング\nサポート", "key": "URL_RIGGING", "type": "gas", "icon": "assets/rigging.png", "visible": True},
-    {"label": "備品管理\nツール", "url": "dev", "type": "dev", "icon": "assets/inventory.png", "visible": True},
+    {"label": "備品管理\nツール", "key": "URL_TOOL", "type": "gas", "icon": "assets/inventory.png", "visible": True},
     {"label": "Google\nドライブ", "key": "URL_DRIVE", "type": "link", "icon": "assets/google-drive.jpg", "visible": True},
     {"label": "動画解析\nツール", "url": "dev", "type": "dev", "icon": "assets/video.png", "visible": False},
 ]
