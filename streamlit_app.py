@@ -4,22 +4,20 @@ from utils import get_url
 
 st.set_page_config(page_title="ボート部専用ポータル", layout="centered")
 
-# CSS: 画像とボタンを完全に中央揃えにする設定
+# CSS: コンテナ全体を中央寄せし、画像とボタンの配置を揃える設定
 st.markdown("""
     <style>
-    .item-container { 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center;
-        margin-bottom: 25px;
+    .menu-item-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 20px;
     }
-    .menu-img { 
-        width: 80px; 
-        height: 80px; 
-        object-fit: cover; 
-        margin-bottom: 10px; 
-        display: block; 
+    .stImage {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -38,16 +36,15 @@ if st.user is not None:
                     url = get_url(item)
                     
                     # コンテナ開始
-                    st.markdown('<div class="item-container">', unsafe_allow_html=True)
+                    st.markdown('<div class="menu-item-box">', unsafe_allow_html=True)
                     
-                    # 画像（HTMLのimgタグを直接使用して中央寄せを保証）
-                    st.markdown(f'''
-                        <a href="{url}" target="_blank">
-                            <img src="app/static/{item["icon"]}" class="menu-img">
-                        </a>
-                    ''', unsafe_allow_html=True)
+                    # 1. 画像表示（標準のst.imageを使用）
+                    try:
+                        st.image(item["icon"], width=80)
+                    except:
+                        st.write("画像なし")
                     
-                    # ボタン
+                    # 2. ボタン/リンク表示
                     if item["type"] == "page":
                         if st.button(item["label"], key=f"btn_{i+j}", use_container_width=True):
                             st.switch_page(item["url"])
