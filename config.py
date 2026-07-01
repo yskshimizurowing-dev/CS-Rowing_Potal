@@ -9,7 +9,7 @@ MENU_ITEMS = [
     {"label": "予定表", "url": "pages/schedule.py", "type": "page", "icon": "assets/schedule.png", "visible": True},
     {"label": "欠席連絡\nフォーム", "key": "URL_FORM", "type": "link", "icon": "assets/form.png", "visible": True},
     {"label": "Average\n計算ツール", "url": "pages/calculator.py", "type": "page", "icon": "assets/calculator.png", "visible": True},
-    {"label": "エルゴ測定記録\nデータベース", "key": "URL_DB", "type": "gas", "icon": "assets/db.png", "visible": True},
+    {"label": "エルゴ測定記録\nデータベース", "key": "URL_ErgDB", "type": "gas", "icon": "assets/db.png", "visible": True},
     {"label": "リギング\nサポート", "key": "URL_RIGGING", "type": "gas", "icon": "assets/rigging.png", "visible": True},
     {"label": "備品管理\nツール", "key": "URL_TOOL", "type": "gas", "icon": "assets/inventory.png", "visible": True},
     {"label": "Google\nドライブ", "key": "URL_DRIVE", "type": "link", "icon": "assets/googledrive.jpg", "visible": True},
