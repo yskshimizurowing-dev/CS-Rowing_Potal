@@ -2,58 +2,62 @@ import streamlit as st
 from config import MENU_ITEMS
 from utils import get_url
 
-# ★超重要: 画面幅の自動縮小を防ぐためのCSSを最優先で適用
-st.set_page_config(layout="wide")
-
-st.markdown("""
-    <style>
-    /* アプリ全体の最小横幅を1000pxに固定し、スマホでもPC表示を強制する */
-    .stApp {
-        min-width: 1000px !important;
-    }
-    /* 画像を中央寄せにする設定 */
-    .stImage {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 5px;
-    }
-    /* ボタンを横幅いっぱいに広げる */
-    div.stButton > button {
-        width: 100% !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
+st.set_page_config(layout="centered")
 
 st.title("🚣 ボート部専用ポータル")
 
 visible_items = [item for item in MENU_ITEMS if item.get("visible", True)]
 
 if st.user is not None:
-    # 3個ずつ安全に分割してループ
-    for i in range(0, len(visible_items), 3):
-        cols = st.columns(3)
+    # 1. 安全なHTMLを組み立てる（文字化け・コード漏れを絶対に起こさない構造）
+    html_buttons = ""
+    
+    for item in visible_items:
+        url = get_url(item)
+        label_display = item["label"]
         
-        for j in range(3):
-            if i + j < len(visible_items):
-                item = visible_items[i + j]
-                with cols[j]:
-                    # 1. 画像の表示（安全な純正機能）
-                    icon_path = item.get("icon", "")
-                    if icon_path:
-                        try:
-                            st.image(icon_path, width=70)
-                        except:
-                            st.write("🖼️")
-                    
-                    # 2. ボタン/リンクの表示（安全な純正機能）
-                    url = get_url(item)
-                    if item["type"] == "page":
-                        if st.button(item["label"], key=f"btn_{i+j}", use_container_width=True):
-                            st.switch_page(item["url"])
-                    elif item["type"] == "dev":
-                        if st.button(item["label"], key=f"btn_{i+j}", use_container_width=True):
-                            st.toast("現在開発中です")
-                    else:
-                        st.link_button(item["label"], url, use_container_width=True)
+        # GitHubの画像を直接読み込むためのURL
+        # ※もし画像が出ない場合は、ここを実際の「ユーザー名/リポジトリ名」に変更してください
+        img_src = f"https://raw.githubusercontent.com/cs-rowing/cs-rowing_potal/main/{item['icon']}"
+        
+        # 各ボタンを33%幅（3列）で綺麗に整列させるHTML
+        html_buttons += f'''
+        <a href="{url}" target="_blank" style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 30%;
+            background-color: #f0f2f6;
+            padding: 12px 4px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #31333F;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        ">
+            <img src="{img_src}" style="width: 40px; height: 40px; object-fit: contain; margin-bottom: 8px;" onerror="this.src='https://img.icons8.com/ios/50/image.png'">
+            <span style="font-size: 11px; font-weight: bold; text-align: center; line-height: 1.2; display: block; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{label_display}</span>
+        </a>
+        '''
+
+    # 全体を包むコンテナ（横並びで、絶対に1列に折り返さない設定）
+    full_html = f'''
+    <div style="
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    ">
+        {html_buttons}
+    </div>
+    '''
+    
+    # 2. ★超重要: Streamlit公式の安全な隔離埋め込み機能を使用
+    # これにより、画面に生コードが表示されるバグは100%発生しなくなります
+    st.components.v1.html(full_html, height=500, scrolling=False)
+
 else:
     st.warning("ログインしてください。")
