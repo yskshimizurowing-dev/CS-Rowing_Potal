@@ -15,7 +15,7 @@ BUTTONS = [
     {"label": "🚣\n\n測定記録DB", "key": "URL_DB", "type": "gas"},
     {"label": "🧮\n\nAverage計算", "url": "pages/calculator.py", "type": "page"},
     {"label": "🔧\n\nリギング", "key": "URL_RIGGING", "type": "gas"},
-    {"label": "📦\n\n備品管理", "url": "dev", "type": "dev"},
+    {"label": "📦\n\n備品管理", "key": "URL_TOOL", "type": "gas"},
     {"label": "📊\n\n動画解析", "url": "dev", "type": "dev"},
     {"label": "☁️\n\nGoogleドライブ", "key": "URL_DRIVE", "type": "link"}, 
 ]
