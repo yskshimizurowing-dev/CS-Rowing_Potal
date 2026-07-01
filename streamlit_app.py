@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 from config import MENU_ITEMS
 from utils import get_url
@@ -8,9 +7,7 @@ st.set_page_config(page_title="ボート部専用ポータル", layout="centered
 st.markdown('''
 <style>
     header[data-testid="stHeader"] { display: none !important; }
-    .menu-container { text-align: center; margin-bottom: 25px; }
-    .menu-img { width: 80%; border-radius: 20px; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .menu-img:hover { transform: scale(1.05); }
+    .menu-container { text-align: center; margin-bottom: 10px; }
 </style>
 ''', unsafe_allow_html=True)
 
@@ -26,22 +23,19 @@ if st.user is not None:
             if i + j < len(visible_items):
                 item = visible_items[i + j]
                 with col:
-                    # URLを取得
                     url = get_url(item)
-    
-                    # リンクとして機能させつつ、画像を表示
+                    # 画像をクリックできるようにリンクを貼る
                     st.markdown(f'<a href="{url}" target="_blank">', unsafe_allow_html=True)
-                    st.image(item["icon"], use_container_width=True) # ★ここを修正
+                    st.image(item["icon"], use_container_width=True)
                     st.markdown('</a>', unsafe_allow_html=True)
-                        <div class="menu-container">
-                            <a href="{url}" target="_blank"><img src="{item["icon"]}" class="menu-img"></a>
-                        </div>
-                    ''', unsafe_allow_html=True)
                     
+                    # ボタンの描画
                     if item["type"] == "page":
-                        if st.button(item["label"], use_container_width=True): st.switch_page(item["url"])
+                        if st.button(item["label"], use_container_width=True, key=f"btn_{i+j}"): 
+                            st.switch_page(item["url"])
                     elif item["type"] == "dev":
-                        if st.button(item["label"], use_container_width=True): st.toast("現在開発中です！")
+                        if st.button(item["label"], use_container_width=True, key=f"btn_{i+j}"): 
+                            st.toast("現在開発中です！")
                     else:
                         st.link_button(item["label"], url, use_container_width=True)
 else:
