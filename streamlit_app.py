@@ -4,7 +4,7 @@ from utils import get_url
 
 st.set_page_config(page_title="ボート部専用ポータル", layout="centered")
 
-# CSSで画像を中央寄せし、ボタンの幅と合わせる設定
+# CSS: 画像とボタンを完全に中央揃えにする設定
 st.markdown("""
     <style>
     .item-container { 
@@ -12,9 +12,15 @@ st.markdown("""
         flex-direction: column; 
         align-items: center; 
         justify-content: center;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
-    .stImage { display: flex; justify-content: center; }
+    .menu-img { 
+        width: 80px; 
+        height: 80px; 
+        object-fit: cover; 
+        margin-bottom: 10px; 
+        display: block; 
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -31,16 +37,15 @@ if st.user is not None:
                 with col:
                     url = get_url(item)
                     
-                    # コンテナで囲んで中央寄せを強制する
+                    # コンテナ開始
                     st.markdown('<div class="item-container">', unsafe_allow_html=True)
                     
-                    # 画像（リンク付き）
-                    st.markdown(f'<a href="{url}" target="_blank">', unsafe_allow_html=True)
-                    try:
-                        st.image(item["icon"], width=80) 
-                    except:
-                        st.write("画像なし")
-                    st.markdown('</a>', unsafe_allow_html=True)
+                    # 画像（HTMLのimgタグを直接使用して中央寄せを保証）
+                    st.markdown(f'''
+                        <a href="{url}" target="_blank">
+                            <img src="app/static/{item["icon"]}" class="menu-img">
+                        </a>
+                    ''', unsafe_allow_html=True)
                     
                     # ボタン
                     if item["type"] == "page":
@@ -52,6 +57,7 @@ if st.user is not None:
                     else:
                         st.link_button(item["label"], url, use_container_width=True)
                     
+                    # コンテナ終了
                     st.markdown('</div>', unsafe_allow_html=True)
 else:
     st.warning("ログインしてください。")
