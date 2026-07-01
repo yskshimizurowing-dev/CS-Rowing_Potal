@@ -2,25 +2,27 @@ import streamlit as st
 from config import MENU_ITEMS
 from utils import get_url
 
-st.set_page_config(page_title="ボート部専用ポータル", layout="centered")
+st.set_page_config(layout="centered")
 
 st.title("🚣 ボート部専用ポータル")
 
 visible_items = [item for item in MENU_ITEMS if item.get("visible", True)]
 
+# 3列で表示（PC/スマホのレイアウト崩れ対策として、最も標準的な方法）
+cols = st.columns(3)
+
 if st.user is not None:
-    # 3列を作成
-    cols = st.columns(3)
-    
-    # 全てのアイテムをループで回す
     for idx, item in enumerate(visible_items):
         with cols[idx % 3]:
+            # 画像パスを直接指定
+            icon_path = item.get("icon", "")
+            
+            # 画像表示
+            if icon_path:
+                st.image(icon_path, use_container_width=True)
+            
+            # ボタン
             url = get_url(item)
-            
-            # 画像の配置（カラムの中で中央に寄せる）
-            st.image(item["icon"], use_container_width=True)
-            
-            # ボタン/リンク表示
             if item["type"] == "page":
                 if st.button(item["label"], key=f"btn_{idx}", use_container_width=True):
                     st.switch_page(item["url"])
