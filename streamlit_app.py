@@ -4,11 +4,17 @@ from utils import get_url
 
 st.set_page_config(page_title="ボート部専用ポータル", layout="centered")
 
-# CSS: 画像のサイズを制限し、マウスオーバーでポインタを表示する
+# CSSで画像を中央寄せし、ボタンの幅と合わせる設定
 st.markdown("""
     <style>
-    .menu-img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin-bottom: 5px; }
-    .item-container { text-align: center; margin-bottom: 20px; }
+    .item-container { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .stImage { display: flex; justify-content: center; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -25,23 +31,27 @@ if st.user is not None:
                 with col:
                     url = get_url(item)
                     
-                    # 画像をクリック可能なリンクにする
-                    st.markdown(f'<div class="item-container"><a href="{url}" target="_blank">', unsafe_allow_html=True)
+                    # コンテナで囲んで中央寄せを強制する
+                    st.markdown('<div class="item-container">', unsafe_allow_html=True)
+                    
+                    # 画像（リンク付き）
+                    st.markdown(f'<a href="{url}" target="_blank">', unsafe_allow_html=True)
                     try:
-                        # 画像サイズをCSSのクラスで制限
-                        st.image(item["icon"], width=100) 
+                        st.image(item["icon"], width=80) 
                     except:
                         st.write("画像なし")
                     st.markdown('</a>', unsafe_allow_html=True)
                     
-                    # ボタンでリンク遷移
+                    # ボタン
                     if item["type"] == "page":
-                        if st.button(item["label"], key=f"btn_{i+j}"):
+                        if st.button(item["label"], key=f"btn_{i+j}", use_container_width=True):
                             st.switch_page(item["url"])
                     elif item["type"] == "dev":
-                        if st.button(item["label"], key=f"btn_{i+j}"):
+                        if st.button(item["label"], key=f"btn_{i+j}", use_container_width=True):
                             st.toast("現在開発中です")
                     else:
                         st.link_button(item["label"], url, use_container_width=True)
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
 else:
     st.warning("ログインしてください。")
