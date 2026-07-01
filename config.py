@@ -12,6 +12,6 @@ MENU_ITEMS = [
     {"label": "エルゴ測定記録\nデータベース", "key": "URL_ErgDB", "type": "gas", "icon": "assets/db.png", "visible": True},
     {"label": "リギング\nサポート", "key": "URL_RIGGING", "type": "gas", "icon": "assets/rigging.png", "visible": True},
     {"label": "備品管理\nツール", "key": "URL_TOOL", "type": "gas", "icon": "assets/inventory.png", "visible": True},
-    {"label": "Google\nドライブ", "key": "URL_DRIVE", "type": "link", "icon": "assets/googledrive.jpg", "visible": True},
+    {"label": "Google\nドライブ", "key": "URL_DRIVE", "type": "link", "icon": "static/googledrive.jpg", "visible": True},
     {"label": "動画解析\nツール", "url": "dev", "type": "dev", "icon": "assets/video.png", "visible": False},
 ]
